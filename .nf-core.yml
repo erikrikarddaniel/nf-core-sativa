@@ -1,0 +1,22 @@
+repository_type: pipeline
+
+nf_core_version: 4.0.2
+
+lint:
+  files_exist:
+    - conf/igenomes.config
+    - conf/igenomes_ignored.config
+
+template:
+  org: nf-core
+  name: sativa
+  description: This pipeline checks sequences for their phylogenetic signal against
+    their taxonomy
+  author: Daniel Lundin
+  version: 1.0.0dev
+  force: true
+  outdir: .
+  skip_features:
+    - igenomes
+    - gpu
+  is_nfcore: true
