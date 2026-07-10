@@ -8,6 +8,16 @@
       2. Classify every sequence via leave-one-out EPA    (epa_classifier.py)
       3. Score placements, report mismatches              (mislabels_handler.py)
 
+main.nf
+  └── PIPELINE_INITIALISATION   (subworkflows/local/utils_nfcore_sativa_pipeline/main.nf)
+        validates params, parses samplesheet → ch_samplesheet channel
+  └── NFCORE_SATIVA
+        └── SATIVA               (workflows/sativa.nf)  ← main logic lives here
+              ├── FASTQC          (modules/nf-core/fastqc/)
+              └── MULTIQC         (modules/nf-core/multiqc/)
+  └── PIPELINE_COMPLETION        (subworkflows/local/utils_nfcore_sativa_pipeline/main.nf)
+        sends email / completion summary
+
     Required nf-core modules (install before use):
       nf-core modules install raxmlng/search
       nf-core modules install raxmlng/evaluate
