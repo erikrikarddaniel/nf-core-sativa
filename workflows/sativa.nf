@@ -3,7 +3,6 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -19,7 +18,8 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sati
 workflow SATIVA {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    ch_taxonomy  // channel: taxonomy file
+    ch_alignment // channel: alignment file
     multiqc_config
     multiqc_logo
     multiqc_methods_description
@@ -29,11 +29,6 @@ workflow SATIVA {
 
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
-    //
-    // MODULE: Run FastQC
-    //
-    FASTQC(ch_samplesheet)
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
 
     //
     // Collate and save software versions

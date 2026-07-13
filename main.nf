@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SATIVA  } from './workflows/sativa'
+include { SATIVA                  } from './workflows/sativa'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_sativa_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_sativa_pipeline'
 /*
@@ -30,7 +30,8 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_sati
 workflow NFCORE_SATIVA {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    taxonomy  // channel: taxonomy file
+    alignment // channel: alignment file
 
     main:
 
@@ -38,7 +39,8 @@ workflow NFCORE_SATIVA {
     // WORKFLOW: Run pipeline
     //
     SATIVA (
-        samplesheet,
+        taxonomy,
+        alignment,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,
@@ -65,7 +67,8 @@ workflow {
         params.monochrome_logs,
         args,
         params.outdir,
-        params.input,
+        params.taxonomy,
+        params.alignment,
         params.help,
         params.help_full,
         params.show_hidden
@@ -75,8 +78,10 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_SATIVA (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.taxonomy,
+        PIPELINE_INITIALISATION.out.alignment
     )
+
     //
     // SUBWORKFLOW: Run completion tasks
     //
