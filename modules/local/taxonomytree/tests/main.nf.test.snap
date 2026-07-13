@@ -39,11 +39,11 @@
                     {
                         "id": "sativa_test"
                     },
-                    "sativa_test.guide.nwk:md5,f535a9c9e339ccdc4fa3b7670143bea3"
+                    "sativa_test.guide.nwk:md5,d02bbee02826f3322e3833fc86702e44"
                 ]
             ]
         ],
-        "timestamp": "2026-07-13T10:40:30.813104779",
+        "timestamp": "2026-07-13T21:25:09.725650743",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

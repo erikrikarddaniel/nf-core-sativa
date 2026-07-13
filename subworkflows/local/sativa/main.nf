@@ -27,6 +27,7 @@ main.nf
 */
 
 include { TAXONOMYTREE } from '../../../modules/local/taxonomytree/main'
+include { IQTREE       } from '../../../modules/nf-core/iqtree/main'
 //include { RAXMLNG_SEARCH   } from '../../../modules/nf-core/raxmlng/search/main'
 //include { RAXMLNG_EVALUATE } from '../../../modules/nf-core/raxmlng/evaluate/main'
 //include { EPANG_HMMBUILD   } from '../../../modules/nf-core/epang/hmmbuild/main'
@@ -147,6 +148,33 @@ process SATIVA_SCORE {
 }
 **/
 
+/**
+process CHECKNAMECONSISTENCY {
+    label 'process_low'
+
+    conda "conda-forge::python=3.11 bioconda::biopython=1.84"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/biopython:1.84' :
+        'biocontainers/biopython:1.84' }"
+
+    input:
+    path taxonomy
+    path alignment
+
+    output:
+
+    script:
+
+    """
+    """
+
+    stub:
+
+    """
+    """
+}
+**/
+
 // ─── Subworkflow ──────────────────────────────────────────────────────────────
 
 workflow SATIVA {
@@ -169,6 +197,11 @@ workflow SATIVA {
     main:
 //    def ch_versions = channel.empty()
 
+    //
+    // Check that ch_taxonomy and ch_alignment have the same set of unique names
+    //
+    //CHECKNAMECONSISTENCY(ch_taxonomy, ch_alignment)
+
     // ── Phase 1: Reference tree construction (epa_trainer) ────────────────────
     //
     // Build a multifurcating guide tree from taxonomy strings, then run RAxML-NG
@@ -189,6 +222,21 @@ workflow SATIVA {
 //
 //    RAXMLNG_SEARCH(ch_search_input)
 //    ch_versions = ch_versions.mix(RAXMLNG_SEARCH.out.versions)
+    IQTREE(
+        ch_alignment.map { it -> [ [ id: 'user-alignment' ], it, [] ] },    // Alignment
+        [],                                                                 // tree_te
+        [],                                                                 // lmclust
+        [],                                                                 // mdef
+        [],                                                                 // partitions_equal
+        [],                                                                 // partitions_proportional
+        [],                                                                 // partitions_unlinked
+        [],                                                                 // guide_tree
+        [],                                                                 // sitefreq_in
+        TAXONOMYTREE.out.guide_tree.map { _meta, tree -> tree },            // constraint_tree
+        [],                                                                 // trees_z
+        [],                                                                 // suptree
+        []                                                                  // trees_rf
+    )
 //
 //    // Optimise model parameters on the winning tree (raxml-ng --evaluate)
 //    def ch_eval_input = ch_alignment

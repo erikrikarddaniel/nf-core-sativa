@@ -6,6 +6,8 @@ lint:
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
+  nextflow_config:
+    - params.input
 
 template:
   org: nf-core
