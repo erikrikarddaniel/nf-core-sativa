@@ -1,0 +1,52 @@
+{
+    "sativa - taxonomy tsv - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "sativa_test"
+                        },
+                        "sativa_test.guide.nwk:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,eeac7118c66a990f3529ae594408472d"
+                ],
+                "guide_tree": [
+                    [
+                        {
+                            "id": "sativa_test"
+                        },
+                        "sativa_test.guide.nwk:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,eeac7118c66a990f3529ae594408472d"
+                ]
+            }
+        ],
+        "timestamp": "2026-07-13T10:55:55.912743515",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "guide_tree": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "sativa_test"
+                    },
+                    "sativa_test.guide.nwk:md5,f535a9c9e339ccdc4fa3b7670143bea3"
+                ]
+            ]
+        ],
+        "timestamp": "2026-07-13T10:40:30.813104779",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}
