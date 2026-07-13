@@ -11,16 +11,19 @@ Requires Nextflow ≥ 25.10.4.
 ## Commands
 
 **Run the pipeline (with Docker):**
+
 ```bash
 nextflow run main.nf -profile docker --input samplesheet.csv --outdir results
 ```
 
 **Run minimal test suite:**
+
 ```bash
 nextflow run main.nf -profile test,docker --outdir results
 ```
 
 **Run nf-test (unit/integration tests):**
+
 ```bash
 nf-test test tests/default.nf.test
 # Run all tests (respects nf-test.config ignore rules):
@@ -28,16 +31,19 @@ nf-test test
 ```
 
 **Lint with nf-core tools:**
+
 ```bash
 nf-core pipelines lint
 ```
 
 **Format code (Prettier + Nextflow lint via pre-commit):**
+
 ```bash
 pre-commit run --all-files
 ```
 
 **Update nf-core modules:**
+
 ```bash
 nf-core modules update <module-name>
 ```
