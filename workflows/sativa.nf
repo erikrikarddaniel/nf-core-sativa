@@ -8,6 +8,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sativa_pipeline'
+include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,6 +59,15 @@ workflow SATIVA {
             sort: true,
             newLine: true
         )
+
+    //
+    // SUBWORKFLOW: SATIVA
+    //
+    // This implements all the logic in the workflow.
+    //
+    // The later two params are meant to pass a reference tree and a model file respectively. Not implemented yet.
+    //
+    SWF_SATIVA(ch_taxonomy, ch_alignment, [], [])
 
     //
     // MODULE: MultiQC

@@ -13,7 +13,7 @@ process TAXONOMYTREE {
 
     output:
     tuple val(meta), path("*.guide.nwk"), emit: guide_tree
-    path "versions.yml",                  emit: versions, topic: true
+    path "versions.yml",                  emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -67,12 +67,11 @@ def main(taxonomy_file, output_file):
         print(newick, file=fh)
 
 main(sys.argv[1], sys.argv[2])
-PYEOF
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python3 --version | sed 's/Python //')
-    END_VERSIONS
+with open('versions.yml', 'w') as fh:
+    print('"${task.process}":', file=fh)
+    print('    python: ' + sys.version.split()[0], file=fh)
+PYEOF
     """
 
     stub:

@@ -30,13 +30,14 @@ include { TAXONOMYTREE } from '../../../modules/local/taxonomytree/main'
 //include { RAXMLNG_SEARCH   } from '../../../modules/nf-core/raxmlng/search/main'
 //include { RAXMLNG_EVALUATE } from '../../../modules/nf-core/raxmlng/evaluate/main'
 //include { EPANG_HMMBUILD   } from '../../../modules/nf-core/epang/hmmbuild/main'
-include { EPANG_PLACE         } from '../../../modules/nf-core/epang/place/main'
+//include { EPANG_PLACE         } from '../../../modules/nf-core/epang/place/main'
 
 // Decompose the labeled MSA into N (query, reference) pairs, one per sequence.
 // For each sequence i: query_i = seq_i alone; ref_i = all other N-1 sequences.
 // File names use the sequence ID as the basename so downstream processes can
 // correlate queries with references after .transpose() scatter.
 // Corresponds to the per-sequence loop inside sativa.py::LeaveOneTest.run().
+/**
 process SATIVA_LOO_SPLIT {
     label 'process_low'
 
@@ -85,6 +86,7 @@ process SATIVA_LOO_SPLIT {
     END_VERSIONS
     """
 }
+**/
 
 // Parse the per-sequence jplace placements, score them against original taxonomy
 // labels using likelihood-weighted voting over placement edges, and emit a TSV
@@ -95,6 +97,7 @@ process SATIVA_LOO_SPLIT {
 //   For each jplace file → identify the set of pendant/neighbouring leaves
 //   → majority-vote the taxonomy at each rank → compare to original label
 //   → flag as mislabel if they disagree and LW confidence > cutoff (-C in original)
+/**
 process SATIVA_SCORE {
     label 'process_low'
 
@@ -142,19 +145,20 @@ process SATIVA_SCORE {
     END_VERSIONS
     """
 }
+**/
 
 // ─── Subworkflow ──────────────────────────────────────────────────────────────
 
 workflow SATIVA {
 
     take:
-    ch_alignment  // channel: [ val(meta), path(alignment.fasta) ]
-                  //   Aligned, labeled sequences (FASTA or PHYLIP).
-                  //   Sequence IDs must match the first column of ch_taxonomy.
-
     ch_taxonomy   // channel: [ val(meta), path(taxonomy.tsv) ]
                   //   Tab-separated: seq_name <TAB> Kingdom;Phylum;Class;...
                   //   The taxonomic code (BAC/BOT/ZOO/VIR) is the first token.
+
+    ch_alignment  // channel: [ val(meta), path(alignment.fasta) ]
+                  //   Aligned, labeled sequences (FASTA or PHYLIP).
+                  //   Sequence IDs must match the first column of ch_taxonomy.
 
     ch_ref_tree   // channel: [ val(meta), path(tree.nwk) ]
                   //   Pre-built reference tree. Pass Channel.empty() to build one.
@@ -163,7 +167,7 @@ workflow SATIVA {
                   //   RAxML-NG model file matching ch_ref_tree. Channel.empty() if none.
 
     main:
-    def ch_versions = channel.empty()
+//    def ch_versions = channel.empty()
 
     // ── Phase 1: Reference tree construction (epa_trainer) ────────────────────
     //
@@ -173,7 +177,7 @@ workflow SATIVA {
     // then model-optimised.  The resulting tree + model are reusable across runs
     // (pass via ch_ref_tree / ch_ref_model to skip this phase).
 
-    TAXONOMYTREE(ch_taxonomy)
+    TAXONOMYTREE(ch_taxonomy.map { it -> [ [ id: 'guide-tree' ], it ] })
 
 //    // Combine alignment with guide tree; pass guide as topology constraint.
 //    // TODO: RAXMLNG_SEARCH needs ext.args = "--tree-constraint <guide.nwk>"
@@ -197,6 +201,8 @@ workflow SATIVA {
 //    // Any externally supplied tree/model takes precedence over what we just built
 //    def ch_tree  = ch_ref_tree .mix(RAXMLNG_EVALUATE.out.tree)
 //    def ch_model = ch_ref_model.mix(RAXMLNG_EVALUATE.out.model)
+    def ch_tree = channel.empty()
+    def ch_model = channel.empty()
 //
 //    // ── Phase 2: HMM profile ──────────────────────────────────────────────────
 //    //
@@ -263,6 +269,6 @@ workflow SATIVA {
     emit:
 //    mislabels = SATIVA_SCORE.out.mislabels  // [ meta, tsv ]  putative mislabels, ranked
 //    summary   = SATIVA_SCORE.out.summary    // [ meta, txt ]  run statistics
-//    tree      = ch_tree                     // [ meta, nwk ]  reference tree (cache for reuse)
-//    model     = ch_model                    // [ meta, txt ]  RAxML-NG model  (cache for reuse)
+    tree      = ch_tree                     // [ meta, nwk ]  reference tree (cache for reuse)
+    model     = ch_model                    // [ meta, txt ]  RAxML-NG model  (cache for reuse)
 }
