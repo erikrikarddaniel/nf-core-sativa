@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "sativascore"
+description: |
+  Score per-sequence leave-one-out EPA-ng placements (jplace) against the
+  original taxonomy labels. For each query, the best-scoring placement edge's
+  neighbouring reference leaves are majority-voted per taxonomic rank to get a
+  predicted label, which is compared to the sequence's declared label. A
+  putative mislabel is reported where they first diverge, provided the best
+  placement's likelihood weight ratio clears --min-lwr. Corresponds to
+  mislabels_handler.py in the original SATIVA.
+keywords:
+  - phylogenetics
+  - taxonomy
+  - mislabels
+  - jplace
+  - sativa
+tools:
+  - "sativa":
+      description: "Freely available tools for computational molecular biology."
+      homepage: "None"
+      documentation: "None"
+      tool_dev_url: "None"
+      doi: ""
+      licence: ["MIT"]
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing sample information. e.g. `[
+          id:'sample1' ]`
+    - jplace_files:
+        type: file
+        description: One gzipped jplace file per held-out sequence, all belonging to the same input dataset.
+        pattern: "placements/*.jplace.gz"
+    - taxonomy:
+        type: file
+        description: Tab-separated original taxonomy labels (seq_name<TAB>rank1;rank2;...).
+        pattern: "*.{tsv,tax}"
+output:
+  mislabels:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information. e.g. `[
+            id:'sample1' ]`
+      - "*.mislabels.tsv":
+          type: file
+          description: Putative mislabels, one row per flagged sequence (seq_name, original_label, predicted_label, lwr, mismatch_rank).
+          pattern: "*.mislabels.tsv"
+  summary:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information. e.g. `[
+            id:'sample1' ]`
+      - "*.summary.txt":
+          type: file
+          description: Run statistics (sequences scored, threshold used, mislabel count).
+          pattern: "*.summary.txt"
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The version of Python
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The version of Python
+authors:
+  - "@erikrikarddaniel"
+maintainers:
+  - "@erikrikarddaniel"

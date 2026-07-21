@@ -1,0 +1,62 @@
+{
+    "mislabels_and_summary": {
+        "content": [
+            "seq_name\toriginal_label\tpredicted_label\tlwr\tmismatch_rank\nDupSeq01\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies1\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies[2]\t0.988242\t7\nDupSeq02\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies[2]\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies1\t0.988242\t7\n",
+            "sequences scored: 3\nmin_lwr threshold: 0.5\nputative mislabels: 2\n"
+        ],
+        "timestamp": "2026-07-21T10:04:13.029767504",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "sativa - 3 real jplace placements - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "sativa_score_test"
+                        },
+                        "sativa_score_test.mislabels.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "sativa_score_test"
+                        },
+                        "sativa_score_test.summary.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,7e393c45f31ef12011a0aa049ab0bf8d"
+                ],
+                "mislabels": [
+                    [
+                        {
+                            "id": "sativa_score_test"
+                        },
+                        "sativa_score_test.mislabels.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "summary": [
+                    [
+                        {
+                            "id": "sativa_score_test"
+                        },
+                        "sativa_score_test.summary.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,7e393c45f31ef12011a0aa049ab0bf8d"
+                ]
+            }
+        ],
+        "timestamp": "2026-07-21T10:04:18.361796205",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

@@ -1,0 +1,82 @@
+nextflow_process {
+
+    name "Test Process SATIVASCORE"
+    script "../main.nf"
+    process "SATIVASCORE"
+
+    tag "modules"
+    tag "modules_local"
+    tag "sativa"
+    tag "sativa/sativascore"
+
+    test("sativa - 3 real jplace placements") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'sativa_score_test' ],
+                    [
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_UnpCCeti.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq01.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq02.jplace.gz", checkIfExists: true),
+                    ],
+                    file("\$projectDir/run_sativa_tests/sativa_test.tax", checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def mislabels = path(process.out.mislabels[0][1]).text
+            def summary   = path(process.out.summary[0][1]).text
+
+            assertAll(
+                // DupSeq01/DupSeq02 are an intentional swapped-label pair in the test
+                // data; their best placement has a high LWR, so both should be flagged.
+                { assert mislabels.contains('DupSeq01') },
+                { assert mislabels.contains('DupSeq02') },
+                // UnpCCeti's best placement has a very low LWR (~0.03) with the default
+                // --min-lwr 0.5, so it must NOT be flagged even though it mismatches.
+                { assert !mislabels.contains('UnpCCeti') },
+                { assert summary.contains('sequences scored: 3') },
+                { assert summary.contains('putative mislabels: 2') },
+                { assert snapshot(mislabels, summary).match("mislabels_and_summary") },
+                { assert process.out.versions }
+            )
+        }
+
+    }
+
+    test("sativa - 3 real jplace placements - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'sativa_score_test' ],
+                    [
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_UnpCCeti.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq01.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq02.jplace.gz", checkIfExists: true),
+                    ],
+                    file("\$projectDir/run_sativa_tests/sativa_test.tax", checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+}

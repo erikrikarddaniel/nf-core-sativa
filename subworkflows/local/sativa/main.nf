@@ -29,69 +29,11 @@ main.nf
 include { TAXONOMYTREE   } from '../../../modules/local/taxonomytree/main'
 include { IQTREE         } from '../../../modules/nf-core/iqtree/main'
 include { SATIVALOOSPLIT } from '../../../modules/local/sativaloosplit/main'
+include { SATIVASCORE    } from '../../../modules/local/sativascore/main'
 //include { RAXMLNG_SEARCH   } from '../../../modules/nf-core/raxmlng/search/main'
 //include { RAXMLNG_EVALUATE } from '../../../modules/nf-core/raxmlng/evaluate/main'
 //include { EPANG_HMMBUILD   } from '../../../modules/nf-core/epang/hmmbuild/main'
 include { EPANG_PLACE       } from '../../../modules/nf-core/epang/place/main'
-
-// Parse the per-sequence jplace placements, score them against original taxonomy
-// labels using likelihood-weighted voting over placement edges, and emit a TSV
-// of putative mislabels ranked by confidence.
-// Corresponds to mislabels_handler.py in the original Sativa.
-//
-// Scoring logic:
-//   For each jplace file → identify the set of pendant/neighbouring leaves
-//   → majority-vote the taxonomy at each rank → compare to original label
-//   → flag as mislabel if they disagree and LW confidence > cutoff (-C in original)
-/**
-process SATIVA_SCORE {
-    label 'process_low'
-
-    conda "conda-forge::python=3.11 bioconda::biopython=1.84"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/biopython:1.84' :
-        'biocontainers/biopython:1.84' }"
-
-    input:
-    // All N jplace files for one job are staged under placements/
-    tuple val(meta), path(jplace_files, stageAs: "placements/*"), path(taxonomy)
-
-    output:
-    tuple val(meta), path("*.mislabels.tsv"), emit: mislabels
-    tuple val(meta), path("*.summary.txt"),   emit: summary
-    path "versions.yml",                      emit: versions
-
-    script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def args   = task.ext.args   ?: ""  // e.g. "--confidence 0.5 --min-lwr 0.0"
-    // TODO: implement bin/sativa_score.py
-    // Output TSV columns:
-    //   seq_name, original_label, predicted_label, confidence, lwr, mislabel_rank
-    """
-    sativa_score.py \\
-        --placements placements/ \\
-        --taxonomy   ${taxonomy} \\
-        --output     ${prefix}.mislabels.tsv \\
-        --summary    ${prefix}.summary.txt \\
-        ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //')
-    END_VERSIONS
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}.mislabels.tsv ${prefix}.summary.txt
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //')
-    END_VERSIONS
-    """
-}
-**/
 
 /**
 process CHECKNAMECONSISTENCY {
@@ -197,7 +139,7 @@ workflow SATIVA {
         def matcher = log.text =~ /Best-fit model: (.*) chosen according to/
         [ meta, matcher.find() ? matcher.group(1) : null ]
     }
-//
+
 //    // ── Phase 2: HMM profile ──────────────────────────────────────────────────
 //    //
 //    // EPA-ng uses an HMM profile built from the reference MSA to re-align each
@@ -237,9 +179,13 @@ workflow SATIVA {
     // conf/modules.config); fold the IQTREE-derived model string into each split's
     // meta so the config closure can read it. ch_model holds a single item per
     // input dataset, so .combine() broadcasts it across all N ch_loo items.
+    // NB: combine directly on the [meta, model] tuples rather than unwrapping model
+    // into its own .map() first — under -stub-run (or any run where the regex finds
+    // no match) model is null, and a bare null returned from .map() is silently
+    // dropped by Nextflow, which would empty out this channel entirely.
     def ch_loo_with_model = ch_loo
-        .combine(ch_model.map { _meta, model -> model })
-        .map { meta, queryaln, referencealn, referencetree, model ->
+        .combine(ch_model)
+        .map { meta, queryaln, referencealn, referencetree, _model_meta, model ->
             [ meta + [ model: model ], queryaln, referencealn, referencetree ]
         }
 
@@ -247,28 +193,31 @@ workflow SATIVA {
     // profile needed: query/reference alignments are both subsets of the same
     // input MSA, so they already share the same column coordinate space.
     EPANG_PLACE(ch_loo_with_model, [], [])
-//
-//    // ── Phase 4: Gather and score (mislabels_handler) ─────────────────────────
-//    //
-//    // Collect all N per-sequence jplace files back into one item per input dataset,
-//    // then compare each EPA classification to the original taxonomy label.
-//
-//    def ch_score_input = EPANG_PLACE.out.jplace
-//        // meta.id carries the per-sequence counter suffix added after SATIVALOOSPLIT's
-//        // transpose (e.g. "user-alignment_0001"); strip it back off so all N results
-//        // for one input dataset land in the same tuple.
-//        .map { meta, jplace -> [ meta + [ id: meta.id.tokenize('_')[0..-2].join('_') ], jplace ] }
-//        .groupTuple()
-//        .join(ch_taxonomy)
-//
-//    SATIVA_SCORE(ch_score_input)
-//    ch_versions = ch_versions.mix(SATIVA_SCORE.out.versions)
+
+    // ── Phase 4: Gather and score (mislabels_handler) ──────────────────────────
+    //
+    // Collect all N per-sequence jplace files back into one item per input dataset,
+    // then compare each EPA classification to the original taxonomy label.
+
+    def ch_score_input = EPANG_PLACE.out.jplace
+        // meta carries both the per-sequence counter suffix added after SATIVALOOSPLIT's
+        // transpose (e.g. "user-alignment_0001") and the 'model' key folded in above for
+        // epa-ng's ext.args; rebuild a bare [id:...] meta (strip the counter and drop
+        // 'model') rather than merging, so it matches ch_taxonomy's meta below exactly
+        // and .join() doesn't silently match nothing.
+        .map { meta, jplace -> [ [ id: meta.id.tokenize('_')[0..-2].join('_') ], jplace ] }
+        .groupTuple()
+        // ch_taxonomy is a bare file channel (see take: above); give it the same
+        // 'user-alignment' meta used elsewhere so it lines up with ch_score_input.
+        .join(ch_taxonomy.map { [ [ id: 'user-alignment' ], it ] })
+
+    SATIVASCORE(ch_score_input)
 
     emit:
-//    mislabels = SATIVA_SCORE.out.mislabels  // [ meta, tsv ]  putative mislabels, ranked
-//    summary   = SATIVA_SCORE.out.summary    // [ meta, txt ]  run statistics
+    mislabels = SATIVASCORE.out.mislabels   // [ meta, tsv ]  putative mislabels, ranked
+    summary   = SATIVASCORE.out.summary     // [ meta, txt ]  run statistics
     tree      = ch_tree                     // [ meta, nwk ]  reference tree (cache for reuse)
-    model     = ch_model                    // [ meta, txt ]  RAxML-NG model  (cache for reuse)
+    model     = ch_model                    // [ meta, txt ]  IQTREE model  (cache for reuse)
     loo       = ch_loo                      // [ meta, queryaln, referencealn, referencetree ]  per-sequence LOO triples
     jplace    = EPANG_PLACE.out.jplace      // [ meta, jplace.gz ]  per-sequence EPA-ng placement result
 }
