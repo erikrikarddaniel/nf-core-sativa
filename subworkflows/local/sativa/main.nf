@@ -26,68 +26,13 @@ main.nf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { TAXONOMYTREE } from '../../../modules/local/taxonomytree/main'
-include { IQTREE       } from '../../../modules/nf-core/iqtree/main'
+include { TAXONOMYTREE   } from '../../../modules/local/taxonomytree/main'
+include { IQTREE         } from '../../../modules/nf-core/iqtree/main'
+include { SATIVALOOSPLIT } from '../../../modules/local/sativaloosplit/main'
 //include { RAXMLNG_SEARCH   } from '../../../modules/nf-core/raxmlng/search/main'
 //include { RAXMLNG_EVALUATE } from '../../../modules/nf-core/raxmlng/evaluate/main'
 //include { EPANG_HMMBUILD   } from '../../../modules/nf-core/epang/hmmbuild/main'
-//include { EPANG_PLACE         } from '../../../modules/nf-core/epang/place/main'
-
-// Decompose the labeled MSA into N (query, reference) pairs, one per sequence.
-// For each sequence i: query_i = seq_i alone; ref_i = all other N-1 sequences.
-// File names use the sequence ID as the basename so downstream processes can
-// correlate queries with references after .transpose() scatter.
-// Corresponds to the per-sequence loop inside sativa.py::LeaveOneTest.run().
-/**
-process SATIVA_LOO_SPLIT {
-    label 'process_low'
-
-    conda "conda-forge::python=3.11 bioconda::biopython=1.84"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/biopython:1.84' :
-        'biocontainers/biopython:1.84' }"
-
-    input:
-    tuple val(meta), path(alignment)
-
-    output:
-    tuple val(meta), path("queries/*.fasta"),    emit: queries     // N files, one per seq
-    tuple val(meta), path("references/*.fasta"), emit: references  // N files, complement sets
-    path "versions.yml",                         emit: versions
-
-    script:
-    // TODO: implement bin/sativa_loo_split.py
-    // For each record in ${alignment}:
-    //   write record         → queries/<seq_id>.fasta
-    //   write all others     → references/<seq_id>.fasta
-    // Gaps-only columns must be stripped from each reference alignment.
-    """
-    mkdir -p queries references
-    sativa_loo_split.py \\
-        --alignment ${alignment} \\
-        --queries   queries/ \\
-        --refs      references/
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //')
-    END_VERSIONS
-    """
-
-    stub:
-    """
-    mkdir -p queries references
-    echo ">stub" > queries/stub.fasta
-    echo "A"    >> queries/stub.fasta
-    echo ">stub" > references/stub.fasta
-    echo "A"    >> references/stub.fasta
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version | sed 's/Python //')
-    END_VERSIONS
-    """
-}
-**/
+include { EPANG_PLACE       } from '../../../modules/nf-core/epang/place/main'
 
 // Parse the per-sequence jplace placements, score them against original taxonomy
 // labels using likelihood-weighted voting over placement edges, and emit a TSV
@@ -237,68 +182,71 @@ workflow SATIVA {
         [],                                                                 // suptree
         []                                                                  // trees_rf
     )
-//
-//    // Optimise model parameters on the winning tree (raxml-ng --evaluate)
-//    def ch_eval_input = ch_alignment
-//        .join(RAXMLNG_SEARCH.out.bestTree)
-//        .map { meta, fasta, tree -> [ meta, fasta, tree, [] ] }
-//
-//    RAXMLNG_EVALUATE(ch_eval_input)
-//    ch_versions = ch_versions.mix(RAXMLNG_EVALUATE.out.versions)
-//
-//    // Any externally supplied tree/model takes precedence over what we just built
-//    def ch_tree  = ch_ref_tree .mix(RAXMLNG_EVALUATE.out.tree)
-//    def ch_model = ch_ref_model.mix(RAXMLNG_EVALUATE.out.model)
-    def ch_tree = channel.empty()
-    def ch_model = channel.empty()
+
+    // TODO: give externally supplied ch_ref_tree / ch_ref_model precedence over what
+    // we just built, once main.nf actually exposes a way to pass them in (currently
+    // always called with `[]`, so mixing them in here would inject a spurious
+    // empty-list item into the channel).
+    def ch_tree = IQTREE.out.phylogeny
+
+    // IQTREE doesn't emit a separate model file; the chosen substitution model is
+    // only reported in its run log (e.g. "Best-fit model: GTR+F+I chosen according
+    // to BIC"), so parse it out of there instead. Absent under -stub-run, where the
+    // log is just an empty touched file.
+    def ch_model = IQTREE.out.log.map { meta, log ->
+        def matcher = log.text =~ /Best-fit model: (.*) chosen according to/
+        [ meta, matcher.find() ? matcher.group(1) : null ]
+    }
 //
 //    // ── Phase 2: HMM profile ──────────────────────────────────────────────────
 //    //
 //    // EPA-ng uses an HMM profile built from the reference MSA to re-align each
 //    // LOO query sequence before placement.  Corresponds to the hmmbuild call in
-//    // epa_trainer.py.  Not needed if query sequences are already aligned.
+//    // epa_trainer.py.  Skipped for now: pipeline input is already an aligned MSA,
+//    // so EPA-ng can be run directly (--query is pre-aligned) without a profile.
+//    // Revisit if/when unaligned input becomes a supported entry point.
 //
 //    EPANG_HMMBUILD(ch_alignment)
 //    ch_versions = ch_versions.mix(EPANG_HMMBUILD.out.versions)
 //
-//    // ── Phase 3: Leave-one-out scatter (epa_classifier) ───────────────────────
-//    //
-//    // Split the full MSA into N independent (query, reference) pairs and classify
-//    // each sequence in parallel.  This is the computationally dominant phase; the
-//    // fan-out means Nextflow schedules up to N EPA-ng jobs simultaneously.
-//
-//    SATIVA_LOO_SPLIT(ch_alignment)
-//    ch_versions = ch_versions.mix(SATIVA_LOO_SPLIT.out.versions)
-//
-//    // Scatter: flatten the list outputs into one channel item per sequence.
-//    // Both channels use the sequence ID as the file basename so they remain
-//    // paired after the transpose; we embed seq_id in meta to keep them aligned
-//    // through the join and to label the per-sequence jplace output files.
-//    def ch_queries = SATIVA_LOO_SPLIT.out.queries
-//        .transpose()
-//        .map { meta, q -> [ meta + [seq_id: q.baseName], q ] }
-//
-//    def ch_refs = SATIVA_LOO_SPLIT.out.references
-//        .transpose()
-//        .map { meta, r -> [ meta + [seq_id: r.baseName], r ] }
-//
-//    // Each EPA-ng call gets: query.fasta, ref.fasta, ref.nwk, ref.model, ref.hmm
-//    // The tree/model/hmm inputs are keyed on the base meta (without seq_id),
-//    // so we broadcast them via a cross-join on meta.id.
-//    // TODO: verify EPANG_PLACE module input signature and adjust tuple structure
-//    def ch_place_input = ch_queries
-//        .join(ch_refs)
-//        // Attach tree: strip seq_id for the join, then re-attach
-//        .map { meta, q, r -> [ meta.subMap(meta.keySet() - ['seq_id']), meta.seq_id, q, r ] }
-//        .join(ch_tree)
-//        .join(ch_model)
-//        .join(EPANG_HMMBUILD.out.hmm)
-//        .map { meta, seq_id, q, r, tree, model, hmm ->
-//            [ meta + [seq_id: seq_id], q, r, tree, model, hmm ]
-//        }
-//
-//    EPANG_PLACE(ch_place_input)
-//    ch_versions = ch_versions.mix(EPANG_PLACE.out.versions)
+    // ── Phase 3: Leave-one-out scatter (epa_classifier) ────────────────────────
+    //
+    // Split the full MSA + reference tree into N independent (query, reference,
+    // tree) triples, one per held-out sequence.  This is the computationally
+    // dominant phase; the fan-out means Nextflow schedules up to N EPA-ng jobs
+    // simultaneously once wired to EPANG_PLACE below.
+
+    // ch_alignment is a bare file channel (see take: above); give it the same
+    // 'user-alignment' meta used for the IQTREE call so it lines up with ch_tree.
+    SATIVALOOSPLIT(ch_alignment.map { [ [ id: 'user-alignment' ], it ] }.join(ch_tree))
+
+    // SATIVALOOSPLIT emits one tuple per input dataset, with the query/reference/tree
+    // outputs as same-length file lists (one entry per held-out sequence).  .transpose()
+    // unpacks that into one channel item per sequence, but every unpacked item still
+    // carries the same meta as the parent call — so a running counter (embedded by the
+    // module in each file's basename) is folded into meta.id here to keep the N items
+    // distinct downstream (e.g. for EPANG_PLACE and later grouping/joins).
+    def ch_loo = SATIVALOOSPLIT.out.loo
+        .transpose()
+        .map { meta, queryaln, referencealn, referencetree ->
+            def counter = queryaln.baseName.tokenize('_')[0]
+            [ meta + [ id: "${meta.id}_${counter}" ], queryaln, referencealn, referencetree ]
+        }
+
+    // epa-ng refuses to run without an explicit --model (see ext.args in
+    // conf/modules.config); fold the IQTREE-derived model string into each split's
+    // meta so the config closure can read it. ch_model holds a single item per
+    // input dataset, so .combine() broadcasts it across all N ch_loo items.
+    def ch_loo_with_model = ch_loo
+        .combine(ch_model.map { _meta, model -> model })
+        .map { meta, queryaln, referencealn, referencetree, model ->
+            [ meta + [ model: model ], queryaln, referencealn, referencetree ]
+        }
+
+    // Place each held-out sequence back into its pruned reference tree.  No HMM
+    // profile needed: query/reference alignments are both subsets of the same
+    // input MSA, so they already share the same column coordinate space.
+    EPANG_PLACE(ch_loo_with_model, [], [])
 //
 //    // ── Phase 4: Gather and score (mislabels_handler) ─────────────────────────
 //    //
@@ -306,8 +254,10 @@ workflow SATIVA {
 //    // then compare each EPA classification to the original taxonomy label.
 //
 //    def ch_score_input = EPANG_PLACE.out.jplace
-//        // Strip seq_id before grouping so all N results land in one tuple
-//        .map { meta, jplace -> [ meta.subMap(meta.keySet() - ['seq_id']), jplace ] }
+//        // meta.id carries the per-sequence counter suffix added after SATIVALOOSPLIT's
+//        // transpose (e.g. "user-alignment_0001"); strip it back off so all N results
+//        // for one input dataset land in the same tuple.
+//        .map { meta, jplace -> [ meta + [ id: meta.id.tokenize('_')[0..-2].join('_') ], jplace ] }
 //        .groupTuple()
 //        .join(ch_taxonomy)
 //
@@ -319,4 +269,6 @@ workflow SATIVA {
 //    summary   = SATIVA_SCORE.out.summary    // [ meta, txt ]  run statistics
     tree      = ch_tree                     // [ meta, nwk ]  reference tree (cache for reuse)
     model     = ch_model                    // [ meta, txt ]  RAxML-NG model  (cache for reuse)
+    loo       = ch_loo                      // [ meta, queryaln, referencealn, referencetree ]  per-sequence LOO triples
+    jplace    = EPANG_PLACE.out.jplace      // [ meta, jplace.gz ]  per-sequence EPA-ng placement result
 }

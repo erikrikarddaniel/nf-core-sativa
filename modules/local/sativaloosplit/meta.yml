@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "sativaloosplit"
+description: |
+  Decompose a labeled multiple sequence alignment and its reference tree into
+  N leave-one-out (query, reference) pairs, one per sequence. For sequence i,
+  the query alignment holds only sequence i, the reference alignment holds
+  all other N-1 sequences, and the reference tree is the input tree with
+  sequence i's leaf pruned. Output is shaped to feed directly into
+  epang/place. Corresponds to the per-sequence loop inside
+  sativa.py::LeaveOneTest.run() in the original SATIVA.
+keywords:
+  - phylogenetics
+  - leave-one-out
+  - taxonomy
+  - sativa
+tools:
+  - "sativa":
+      description: "Freely available tools for computational molecular biology."
+      homepage: "None"
+      documentation: "None"
+      tool_dev_url: "None"
+      doi: ""
+      licence: ["Biopython License Agreement"]
+      identifier: biotools:biopython
+
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing sample information. e.g. `[
+          id:'sample1' ]`
+    - alignment:
+        type: file
+        description: Aligned, labeled sequences in FASTA or PHYLIP format (detected by content, not extension).
+        pattern: "*.{fasta,fa,fna,phy,phylip}"
+    - tree:
+        type: file
+        description: Reference tree in Newick format; leaf names must match the alignment sequence IDs.
+        pattern: "*.{nwk,treefile}"
+output:
+  loo:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information. e.g. `[
+            id:'sample1' ]`
+      - queryaln:
+          type: file
+          description: One FASTA file per sequence, holding only that sequence.
+          pattern: "queryaln/*.query.fasta"
+      - referencealn:
+          type: file
+          description: One FASTA file per sequence, holding all other sequences (the complement set).
+          pattern: "referencealn/*.reference.fasta"
+      - referencetree:
+          type: file
+          description: One Newick file per sequence, the input tree with that sequence's leaf pruned.
+          pattern: "referencetree/*.tree.nwk"
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The version of Python
+      - biopython:
+          type: string
+          description: The version of Biopython
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The version of Python
+      - biopython:
+          type: string
+          description: The version of Biopython
+authors:
+  - "@erikrikarddaniel"
+maintainers:
+  - "@erikrikarddaniel"

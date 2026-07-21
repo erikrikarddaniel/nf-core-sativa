@@ -1,0 +1,78 @@
+nextflow_process {
+
+    name "Test Process SATIVALOOSPLIT"
+    script "../main.nf"
+    process "SATIVALOOSPLIT"
+
+    tag "modules"
+    tag "modules_local"
+    tag "sativa"
+    tag "sativa/sativaloosplit"
+
+    test("sativa - 4 sequence alignment and tree") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'sativa_loo_test' ],
+                    file("\$projectDir/run_sativa_tests/sativa_loo_test.fasta", checkIfExists: true),
+                    file("\$projectDir/run_sativa_tests/sativa_loo_test.nwk", checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def queryaln     = process.out.loo[0][1]
+            def referencealn = process.out.loo[0][2]
+            def referencetree = process.out.loo[0][3]
+
+            assertAll(
+                // One query/reference/tree file per input sequence
+                { assert queryaln.size() == 4 },
+                { assert referencealn.size() == 4 },
+                { assert referencetree.size() == 4 },
+                // Each query file holds exactly the one held-out sequence
+                { assert path(queryaln.find { it.contains('SeqA') }).text.contains('>SeqA') },
+                // Each reference file holds the complement set (3 remaining sequences)
+                { assert path(referencealn.find { it.contains('SeqA') }).text.count('>') == 3 },
+                { assert !path(referencealn.find { it.contains('SeqA') }).text.contains('>SeqA') },
+                // Each pruned reference tree drops the held-out leaf but keeps the others
+                { assert !path(referencetree.find { it.contains('SeqA') }).text.contains('SeqA') },
+                { assert path(referencetree.find { it.contains('SeqA') }).text.contains('SeqB') },
+                { assert snapshot(process.out.loo).match("loo") },
+                { assert process.out.versions }
+            )
+        }
+
+    }
+
+    test("sativa - 4 sequence alignment and tree - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'sativa_loo_test' ],
+                    file("\$projectDir/run_sativa_tests/sativa_loo_test.fasta", checkIfExists: true),
+                    file("\$projectDir/run_sativa_tests/sativa_loo_test.nwk", checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+}

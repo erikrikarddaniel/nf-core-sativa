@@ -1,0 +1,73 @@
+{
+    "sativa - 4 sequence alignment and tree - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "sativa_loo_test"
+                        },
+                        "0001_stub.query.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "0001_stub.reference.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "0001_stub.tree.nwk:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,6c8b7ecd472bcc49d7c5402abfd4b1c7"
+                ],
+                "loo": [
+                    [
+                        {
+                            "id": "sativa_loo_test"
+                        },
+                        "0001_stub.query.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "0001_stub.reference.fasta:md5,d41d8cd98f00b204e9800998ecf8427e",
+                        "0001_stub.tree.nwk:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,6c8b7ecd472bcc49d7c5402abfd4b1c7"
+                ]
+            }
+        ],
+        "timestamp": "2026-07-21T09:07:47.102181458",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "loo": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "sativa_loo_test"
+                    },
+                    [
+                        "0001_SeqA.query.fasta:md5,b6413422d35d812c69e72dc6726dd306",
+                        "0002_SeqB.query.fasta:md5,93a927ef408bae69576b688b1087e2f8",
+                        "0003_SeqC.query.fasta:md5,bbd93b86e84c4478d9afa8e315dd5efe",
+                        "0004_SeqD.query.fasta:md5,1bf0c228da9420280eb0faf20f0cadac"
+                    ],
+                    [
+                        "0001_SeqA.reference.fasta:md5,ad4760fa06ca7419b6f1da3b6a551330",
+                        "0002_SeqB.reference.fasta:md5,4a3c0a80a01c8056463148b3576f93f0",
+                        "0003_SeqC.reference.fasta:md5,dc14c873c4cfe1c246f3c681419a5312",
+                        "0004_SeqD.reference.fasta:md5,2bd336d028e892fb88a98af483fef3af"
+                    ],
+                    [
+                        "0001_SeqA.tree.nwk:md5,6478798525b31546189280c26775be16",
+                        "0002_SeqB.tree.nwk:md5,1802f8b7c40f2919b2ea1a44f9f707b1",
+                        "0003_SeqC.tree.nwk:md5,763a388bb3a14fa4ef493591fd397010",
+                        "0004_SeqD.tree.nwk:md5,a9e618e012e127e6014510a8b9c0b7ff"
+                    ]
+                ]
+            ]
+        ],
+        "timestamp": "2026-07-21T09:07:42.244717465",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}
