@@ -32,13 +32,10 @@ os.makedirs('queryaln', exist_ok=True)
 os.makedirs('referencealn', exist_ok=True)
 os.makedirs('referencetree', exist_ok=True)
 
-# Pipeline input alignment may be FASTA or PHYLIP; sniff the first non-blank
-# line to tell them apart rather than relying on the file extension.
-with open(alignment_file) as fh:
-    first_line = next((line.strip() for line in fh if line.strip()), '')
-alignment_format = 'fasta' if first_line.startswith('>') else 'phylip-relaxed'
-
-records = list(SeqIO.parse(alignment_file, alignment_format))
+# The subworkflow normalises whatever format the pipeline was given (FASTA,
+# Clustal, PHYLIP) to PHYLIP via EMBOSS_SEQRET before calling this module, so
+# there is exactly one format to parse here.
+records = list(SeqIO.parse(alignment_file, 'phylip-relaxed'))
 if not records:
     sys.exit('No sequences found in: ' + alignment_file)
 

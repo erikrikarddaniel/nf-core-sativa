@@ -30,8 +30,8 @@ input:
           id:'sample1' ]`
     - alignment:
         type: file
-        description: Aligned, labeled sequences in FASTA or PHYLIP format (detected by content, not extension).
-        pattern: "*.{fasta,fa,fna,phy,phylip}"
+        description: Aligned, labeled sequences in PHYLIP format. The pipeline normalises FASTA/Clustal/PHYLIP input to PHYLIP (via emboss/seqret) before calling this module.
+        pattern: "*.{phy,phylip}"
     - tree:
         type: file
         description: Reference tree in Newick format; leaf names must match the alignment sequence IDs.

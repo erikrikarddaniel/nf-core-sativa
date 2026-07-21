@@ -23,10 +23,12 @@ main.nf
       nf-core modules install raxmlng/evaluate
       nf-core modules install epang/hmmbuild
       nf-core modules install epang/place
+      nf-core modules install emboss/seqret
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 include { TAXONOMYTREE   } from '../../../modules/local/taxonomytree/main'
+include { EMBOSS_SEQRET  } from '../../../modules/nf-core/emboss/seqret/main'
 include { IQTREE         } from '../../../modules/nf-core/iqtree/main'
 include { SATIVALOOSPLIT } from '../../../modules/local/sativaloosplit/main'
 include { SATIVASCORE    } from '../../../modules/local/sativascore/main'
@@ -71,8 +73,11 @@ workflow SATIVA {
                   //   Tab-separated: seq_name <TAB> Kingdom;Phylum;Class;...
                   //   The taxonomic code (BAC/BOT/ZOO/VIR) is the first token.
 
-    ch_alignment  // channel: [ val(meta), path(alignment.fasta) ]
-                  //   Aligned, labeled sequences (FASTA or PHYLIP).
+    ch_alignment  // channel: [ val(meta), path(alignment) ]
+                  //   Aligned, labeled sequences. FASTA, Clustal or PHYLIP; format
+                  //   is auto-detected and normalised to PHYLIP by EMBOSS_SEQRET
+                  //   below, since SATIVALOOSPLIT (our own Python code) only trusts
+                  //   PHYLIP rather than trying to parse every format itself.
                   //   Sequence IDs must match the first column of ch_taxonomy.
 
     ch_ref_tree   // channel: [ val(meta), path(tree.nwk) ]
@@ -88,6 +93,15 @@ workflow SATIVA {
     // Check that ch_taxonomy and ch_alignment have the same set of unique names
     //
     //CHECKNAMECONSISTENCY(ch_taxonomy, ch_alignment)
+
+    // Normalise the input alignment to PHYLIP regardless of whether it arrived as
+    // FASTA, Clustal or PHYLIP. EMBOSS auto-detects the input format from content,
+    // so no format-sniffing of our own is needed here. IQTREE (a compiled tool) can
+    // likely handle any of the three directly, but SATIVALOOSPLIT's hand-rolled
+    // Python parser only supports PHYLIP, so every consumer downstream is kept on
+    // one guaranteed format instead.
+    EMBOSS_SEQRET(ch_alignment.map { [ [ id: 'user-alignment' ], it ] }, 'phylip')
+    def ch_alignment_phylip = EMBOSS_SEQRET.out.outseq
 
     // ── Phase 1: Reference tree construction (epa_trainer) ────────────────────
     //
@@ -110,7 +124,7 @@ workflow SATIVA {
 //    RAXMLNG_SEARCH(ch_search_input)
 //    ch_versions = ch_versions.mix(RAXMLNG_SEARCH.out.versions)
     IQTREE(
-        ch_alignment.map { it -> [ [ id: 'user-alignment' ], it, [] ] },    // Alignment
+        ch_alignment_phylip.map { meta, aln -> [ meta, aln, [] ] },         // Alignment
         [],                                                                 // tree_te
         [],                                                                 // lmclust
         [],                                                                 // mdef
@@ -158,9 +172,7 @@ workflow SATIVA {
     // dominant phase; the fan-out means Nextflow schedules up to N EPA-ng jobs
     // simultaneously once wired to EPANG_PLACE below.
 
-    // ch_alignment is a bare file channel (see take: above); give it the same
-    // 'user-alignment' meta used for the IQTREE call so it lines up with ch_tree.
-    SATIVALOOSPLIT(ch_alignment.map { [ [ id: 'user-alignment' ], it ] }.join(ch_tree))
+    SATIVALOOSPLIT(ch_alignment_phylip.join(ch_tree))
 
     // SATIVALOOSPLIT emits one tuple per input dataset, with the query/reference/tree
     // outputs as same-length file lists (one entry per held-out sequence).  .transpose()
