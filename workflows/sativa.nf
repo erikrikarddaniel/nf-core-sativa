@@ -8,6 +8,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sativa_pipeline'
+include { CHECKNAMECONSISTENCY   } from '../modules/local/checknameconsistency/main'
 include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 
 /*
@@ -61,13 +62,25 @@ workflow SATIVA {
         )
 
     //
+    // MODULE: Validate that taxonomy and alignment name the same sequences, and
+    // rewrite characters that are difficult for downstream tools (e.g. parens) in
+    // both. Runs first, as a process (not inline Nextflow code) so a large input
+    // doesn't inflate the head job's memory/CPU footprint.
+    //
+    CHECKNAMECONSISTENCY(
+        ch_taxonomy.combine(ch_alignment).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
+    )
+    def ch_taxonomy_checked  = CHECKNAMECONSISTENCY.out.checked.map { _meta, tax, _aln -> tax }
+    def ch_alignment_checked = CHECKNAMECONSISTENCY.out.checked.map { _meta, _tax, aln -> aln }
+
+    //
     // SUBWORKFLOW: SATIVA
     //
     // This implements all the logic in the workflow.
     //
     // The later two params are meant to pass a reference tree and a model file respectively. Not implemented yet.
     //
-    SWF_SATIVA(ch_taxonomy, ch_alignment, [], [])
+    SWF_SATIVA(ch_taxonomy_checked, ch_alignment_checked, [], [])
 
     //
     // MODULE: MultiQC

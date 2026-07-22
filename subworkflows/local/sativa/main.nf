@@ -34,33 +34,6 @@ include { SATIVALOOSPLIT } from '../../../modules/local/sativaloosplit/main'
 include { SATIVASCORE    } from '../../../modules/local/sativascore/main'
 include { EPANG_PLACE    } from '../../../modules/nf-core/epang/place/main'
 
-/**
-process CHECKNAMECONSISTENCY {
-    label 'process_low'
-
-    conda "conda-forge::python=3.11 bioconda::biopython=1.84"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/biopython:1.84' :
-        'biocontainers/biopython:1.84' }"
-
-    input:
-    path taxonomy
-    path alignment
-
-    output:
-
-    script:
-
-    """
-    """
-
-    stub:
-
-    """
-    """
-}
-**/
-
 // ─── Subworkflow ──────────────────────────────────────────────────────────────
 
 workflow SATIVA {
@@ -69,6 +42,9 @@ workflow SATIVA {
     ch_taxonomy   // channel: [ val(meta), path(taxonomy.tsv) ]
                   //   Tab-separated: seq_name <TAB> Kingdom;Phylum;Class;...
                   //   The taxonomic code (BAC/BOT/ZOO/VIR) is the first token.
+                  //   CHECKNAMECONSISTENCY (workflows/sativa.nf) has already verified
+                  //   this names the same sequences as ch_alignment and rewritten any
+                  //   problematic characters (e.g. parens) by the time it gets here.
 
     ch_alignment  // channel: [ val(meta), path(alignment) ]
                   //   Aligned, labeled sequences. FASTA, Clustal or PHYLIP; format
@@ -85,11 +61,6 @@ workflow SATIVA {
 
     main:
 //    def ch_versions = channel.empty()
-
-    //
-    // Check that ch_taxonomy and ch_alignment have the same set of unique names
-    //
-    //CHECKNAMECONSISTENCY(ch_taxonomy, ch_alignment)
 
     // Normalise the input alignment to PHYLIP regardless of whether it arrived as
     // FASTA, Clustal or PHYLIP. EMBOSS auto-detects the input format from content,
