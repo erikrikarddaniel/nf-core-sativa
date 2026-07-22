@@ -26,7 +26,7 @@ It takes as input an alignment file and a file describing the proposed taxonomy 
 Using evolutionary placement, it identifies sequences in the alignment that do not have a phylogenetic signal that corresponds to their taxonomies.
 
 > [!NOTE]
-> There are slight differences in how sequences are scored as having a correct taxonomy or not.
+> There are slight differences between this implementation and the original in how sequences are scored as having a correct taxonomy or not.
 > More testing is needed to evaluate these differences.
 
 <picture>
