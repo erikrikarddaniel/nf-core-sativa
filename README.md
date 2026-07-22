@@ -31,12 +31,10 @@ Using evolutionary placement, it identifies sequences in the alignment that do n
 </picture>
 
 1. Check that names in the two files are consistent and do not contain problematic characters
-2. Convert the alignment file to `phylip` format ([EMBOSS](https://www.ebi.ac.uk/Tools/sfc/emboss_seqret/))
-3. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
-4. Create a test dataset by removing one sequence at a time from the alignment and the phylogeny (SATIVALOOSPLIT)
-5. Place the deleted sequences back in the phylogeny ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
-6. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
-7. Summarise the run ([MULTIQC](https://multiqc.info/))
+2. Convert the alignment file to `phylip` format ([EMBOSS](https://www.ebi.ac.uk/Tools/sfc/emboss_seqret/)) and create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
+3. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
+4. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
+5. Summarise the run ([MULTIQC](https://multiqc.info/))
 
 ## Usage
 
