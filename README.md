@@ -21,38 +21,41 @@
 
 ## Introduction
 
-**nf-core/sativa** is a bioinformatics pipeline that ...
+**nf-core/sativa** is a re-implementation of the Sativa pipeline by Kozlov et al. [2016] that identifies taxonomically mislabelled sequences.
+It takes as input an alignment file and a file describing the proposed taxonomy of each sequence in the alignment.
+Using evolutionary placement, it identifies sequences in the alignment that do not have a phylogenetic signal that corresponds to their taxonomy.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-sativa_metro_map_dark.svg">
+  <img alt="nf-core/sativa workflow metro map" src="docs/images/nf-core-sativa_metro_map_light.svg">
+</picture>
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. Check that names in the two files are consistent and do not contain problematic characters
+2. Convert the alignment file to `phylip` format ([EMBOSS](https://www.ebi.ac.uk/Tools/sfc/emboss_seqret/))
+3. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
+4. Create a test dataset by removing one sequence at a time from the alignment and the phylogeny (SATIVALOOSPLIT)
+5. Place the deleted sequences back in the phylogeny ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
+6. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
+7. Summarise the run ([MULTIQC](https://multiqc.info/))
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+First, prepare an alignment file and a taxonomy file.
+The alignment can be either `phylip`, `clustal` or `fasta` formatted.
+The taxonomy file should contain the same sequence names as the alignment, be tab-separated without a header:
 
-First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
-
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+```tsv
+UnpCCeti        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium ceti
+UnpSomer        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium somerae
+UpbRectu        Bacteria;Firmicutes;Clostridia;Clostridiales;Clostridiaceae;Clostridium;Clostridium rectum
+UxjAloci        Bacteria;Firmicutes;Clostridia;Clostridiales;Peptostreptococcaceae;Filifactor;Filifactor alocis
+UyvCanif        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;Fusobacterium canifelinum
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
+(Sequence names containing parenthesis characters will be updated by replacement with underscores.)
 
 Now, you can run the pipeline using:
 
@@ -61,7 +64,8 @@ Now, you can run the pipeline using:
 ```bash
 nextflow run nf-core/sativa \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
+   --alignment alignment.phy \
+   --taxonomy taxonomy.tsv \
    --outdir <OUTDIR>
 ```
 
@@ -78,7 +82,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/sativa was originally written by Daniel Lundin.
+The Sativa tool was originally written by Alexey Kozlov et al. (see citation below) and ported to Nextflow as nf-core/sativa by Daniel Lundin.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
@@ -92,10 +96,16 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
+If you use nf-core/sativa for your analysis, please cite the original article for the algorithm:
+
+> **Phylogeny-Aware Identification and Correction of Taxonomically Mislabeled Sequences.**
+>
+> Kozlov, Alexey M., Jiajie Zhang, Pelin Yilmaz, Frank Oliver Glöckner, and Alexandros Stamatakis.
+>
+> Nucleic Acids Research 44, no. 11 (2016): 5022–33. https://doi.org/10.1093/nar/gkw396.
+
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
 <!-- If you use nf-core/sativa for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
