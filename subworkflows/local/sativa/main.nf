@@ -32,10 +32,7 @@ include { EMBOSS_SEQRET  } from '../../../modules/nf-core/emboss/seqret/main'
 include { IQTREE         } from '../../../modules/nf-core/iqtree/main'
 include { SATIVALOOSPLIT } from '../../../modules/local/sativaloosplit/main'
 include { SATIVASCORE    } from '../../../modules/local/sativascore/main'
-//include { RAXMLNG_SEARCH   } from '../../../modules/nf-core/raxmlng/search/main'
-//include { RAXMLNG_EVALUATE } from '../../../modules/nf-core/raxmlng/evaluate/main'
-//include { EPANG_HMMBUILD   } from '../../../modules/nf-core/epang/hmmbuild/main'
-include { EPANG_PLACE       } from '../../../modules/nf-core/epang/place/main'
+include { EPANG_PLACE    } from '../../../modules/nf-core/epang/place/main'
 
 /**
 process CHECKNAMECONSISTENCY {
@@ -113,16 +110,6 @@ workflow SATIVA {
 
     TAXONOMYTREE(ch_taxonomy.map { it -> [ [ id: 'guide-tree' ], it ] })
 
-//    // Combine alignment with guide tree; pass guide as topology constraint.
-//    // TODO: RAXMLNG_SEARCH needs ext.args = "--tree-constraint <guide.nwk>"
-//    //       until the nf-core module exposes a dedicated input for constraint files,
-//    //       stage guide_tree alongside the alignment and reference it in ext.args.
-//    def ch_search_input = ch_alignment
-//        .join(TAXONOMYTREE.out.guide_tree)
-//        .map { meta, fasta, guide -> [ meta, fasta, guide, [] ] }
-//
-//    RAXMLNG_SEARCH(ch_search_input)
-//    ch_versions = ch_versions.mix(RAXMLNG_SEARCH.out.versions)
     IQTREE(
         ch_alignment_phylip.map { meta, aln -> [ meta, aln, [] ] },         // Alignment
         [],                                                                 // tree_te
