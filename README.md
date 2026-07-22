@@ -23,7 +23,11 @@
 
 **nf-core/sativa** is a re-implementation of the Sativa pipeline by Kozlov et al. [2016] that identifies taxonomically mislabelled sequences.
 It takes as input an alignment file and a file describing the proposed taxonomy of each sequence in the alignment.
-Using evolutionary placement, it identifies sequences in the alignment that do not have a phylogenetic signal that corresponds to their taxonomy.
+Using evolutionary placement, it identifies sequences in the alignment that do not have a phylogenetic signal that corresponds to their taxonomies.
+
+> [!NOTE]
+> There are slight differences in how sequences are scored as having a correct taxonomy or not.
+> More testing is needed to evaluate these differences.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-sativa_metro_map_dark.svg">
@@ -63,7 +67,7 @@ UxjAloci        Bacteria;Firmicutes;Clostridia;Clostridiales;Peptostreptococcace
 UyvCanif        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;Fusobacterium canifelinum
 ```
 
-(Sequence names containing parenthesis characters will be updated by replacement with underscores.)
+(Parentheses in sequence names will be replaced by underscores.)
 
 Now, you can run the pipeline using:
 

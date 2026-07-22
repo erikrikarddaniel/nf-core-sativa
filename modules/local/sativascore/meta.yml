@@ -2,11 +2,15 @@
 name: "sativascore"
 description: |
   Score per-sequence leave-one-out EPA-ng placements (jplace) against the
-  original taxonomy labels. For each query, the best-scoring placement edge's
-  neighbouring reference leaves are majority-voted per taxonomic rank to get a
-  predicted label, which is compared to the sequence's declared label. A
-  putative mislabel is reported where they first diverge, provided the best
-  placement's likelihood weight ratio clears --min-lwr. Corresponds to
+  original taxonomy labels. For each query, every candidate placement edge's
+  neighbouring reference leaves are majority-voted per taxonomic rank, then
+  weighted by that edge's like_weight_ratio and summed across all candidates
+  to get a predicted label and a per-rank confidence, which is compared to
+  the sequence's declared label. A putative mislabel is reported at the first
+  rank where they diverge, provided the aggregated confidence at that rank
+  clears --min-lwr. Requires EPANG_PLACE to be run with a relaxed
+  --filter-max/--filter-min-lwr (see conf/modules.config) so the candidate
+  list isn't truncated before it reaches this module. Corresponds to
   mislabels_handler.py in the original SATIVA.
 keywords:
   - phylogenetics

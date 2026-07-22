@@ -30,7 +30,7 @@ import glob
 import gzip
 import json
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict
 
 def parse_jplace_tree(tree_str):
     # Extended Newick used by EPA-ng: each node's branch length is followed by
@@ -87,7 +87,7 @@ def load_taxonomy(path):
 
 
 def majority_taxonomy(names, tax):
-    # Per-rank majority vote among the leaves neighbouring the placement edge.
+    # Per-rank majority vote among the leaves neighbouring one placement edge.
     rows = [tax[n] for n in names if n in tax]
     if not rows:
         return []
@@ -95,8 +95,42 @@ def majority_taxonomy(names, tax):
     return [Counter(r[i] for r in rows).most_common(1)[0][0] for i in range(n_ranks)]
 
 
-def first_mismatch_rank(predicted, original):
-    for i, (p, o) in enumerate(zip(predicted, original), start=1):
+def weighted_rank_votes(placement, edge_leaves, tax, fields, n_ranks):
+    # A query's placement is a probability distribution (like_weight_ratio) over
+    # candidate edges, not a single best edge. At each rank, sum the LWR of every
+    # candidate whose neighbouring-leaf majority taxonomy agrees on a value; the
+    # winner is the value with the most total weight, and that weight is the
+    # confidence at that rank. Summing across the full candidate set (not just
+    # the top-1 edge) matters: a query can be >95% confidently outside its
+    # declared phylum while no single candidate edge holds more than ~10% of the
+    # weight, because that ~95% is spread thinly across many edges within the
+    # correct (different) clade.
+    idx_edge = fields.index('edge_num')
+    idx_lwr = fields.index('like_weight_ratio')
+
+    rank_weights = [defaultdict(float) for _ in range(n_ranks)]
+    for candidate in placement['p']:
+        edge_num = str(candidate[idx_edge])
+        lwr = candidate[idx_lwr]
+        neighbours = edge_leaves.get(edge_num, set())
+        local_taxonomy = majority_taxonomy(neighbours, tax)
+        for i in range(min(n_ranks, len(local_taxonomy))):
+            rank_weights[i][local_taxonomy[i]] += lwr
+
+    predicted, confidence = [], []
+    for weights in rank_weights:
+        if not weights:
+            predicted.append(None)
+            confidence.append(0.0)
+            continue
+        best_value, best_weight = max(weights.items(), key=lambda kv: kv[1])
+        predicted.append(best_value)
+        confidence.append(best_weight)
+    return predicted, confidence
+
+
+def first_mismatch(predicted, original):
+    for i, (p, o) in enumerate(zip(predicted, original)):
         if p != o:
             return i
     return None
@@ -107,7 +141,7 @@ parser.add_argument('taxonomy')
 parser.add_argument('mislabels_tsv')
 parser.add_argument('summary_txt')
 parser.add_argument('--min-lwr', type=float, default=0.5,
-                     help='Minimum like_weight_ratio of the best placement required to trust it enough to flag a mismatch.')
+                     help='Minimum aggregated placement-weight confidence at the mismatching rank required to trust it enough to flag a mislabel.')
 opts = parser.parse_args()
 
 tax = load_taxonomy(opts.taxonomy)
@@ -119,29 +153,23 @@ for jplace_file in sorted(glob.glob('placements/*.jplace.gz')):
 
     edge_leaves = parse_jplace_tree(data['tree'])
     fields = data['fields']
-    idx_edge = fields.index('edge_num')
-    idx_lwr = fields.index('like_weight_ratio')
 
     for placement in data['placements']:
         query_name = placement['n'][0] if 'n' in placement else placement['nm'][0][0]
-
-        best = max(placement['p'], key=lambda p: p[idx_lwr])
-        edge_num = str(best[idx_edge])
-        lwr = best[idx_lwr]
-
-        neighbours = edge_leaves.get(edge_num, set())
-        predicted = majority_taxonomy(neighbours, tax)
         original = tax.get(query_name, [])
 
-        mismatch_rank = first_mismatch_rank(predicted, original)
-        is_mislabel = mismatch_rank is not None and lwr >= opts.min_lwr
+        predicted, confidence = weighted_rank_votes(placement, edge_leaves, tax, fields, len(original))
+
+        mismatch_rank = first_mismatch(predicted, original)
+        rank_confidence = confidence[mismatch_rank] if mismatch_rank is not None else None
+        is_mislabel = mismatch_rank is not None and rank_confidence >= opts.min_lwr
 
         rows.append({
             'seq_name': query_name,
             'original_label': ';'.join(original),
-            'predicted_label': ';'.join(predicted),
-            'lwr': lwr,
-            'mismatch_rank': mismatch_rank,
+            'predicted_label': ';'.join(str(p) for p in predicted),
+            'lwr': rank_confidence,
+            'mismatch_rank': mismatch_rank + 1 if mismatch_rank is not None else None,
             'is_mislabel': is_mislabel,
         })
 

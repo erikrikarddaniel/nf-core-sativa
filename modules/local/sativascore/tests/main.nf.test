@@ -9,7 +9,7 @@ nextflow_process {
     tag "sativa"
     tag "sativa/sativascore"
 
-    test("sativa - 3 real jplace placements") {
+    test("sativa - 5 real jplace placements, weighted across all candidates") {
 
         when {
             process {
@@ -18,10 +18,12 @@ nextflow_process {
                     [ id:'sativa_score_test' ],
                     [
                         file("\$projectDir/run_sativa_tests/sativa_score_test_UnpCCeti.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_UxjAloci.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_UyvCanif.jplace.gz", checkIfExists: true),
                         file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq01.jplace.gz", checkIfExists: true),
                         file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq02.jplace.gz", checkIfExists: true),
                     ],
-                    file("\$projectDir/run_sativa_tests/sativa_test.tax", checkIfExists: true),
+                    file("\$projectDir/run_sativa_tests/sativa_score_test.tax", checkIfExists: true),
                 ]
                 """
             }
@@ -34,15 +36,29 @@ nextflow_process {
             def summary   = path(process.out.summary[0][1]).text
 
             assertAll(
-                // DupSeq01/DupSeq02 are an intentional swapped-label pair in the test
-                // data; their best placement has a high LWR, so both should be flagged.
+                // DupSeq01/DupSeq02 are an intentional swapped-label pair; almost all
+                // placement weight lands on the wrong one, so both are flagged with
+                // high confidence (~0.98).
                 { assert mislabels.contains('DupSeq01') },
                 { assert mislabels.contains('DupSeq02') },
-                // UnpCCeti's best placement has a very low LWR (~0.03) with the default
-                // --min-lwr 0.5, so it must NOT be flagged even though it mismatches.
-                { assert !mislabels.contains('UnpCCeti') },
-                { assert summary.contains('sequences scored: 3') },
-                { assert summary.contains('putative mislabels: 2') },
+                // UxjAloci is placed within Fusobacteria (not its declared Firmicutes)
+                // by ~99% of the total placement weight once spread across every
+                // candidate edge -- this is the case that a single-best-edge estimate
+                // (LWR ~0.03-0.09 on any individual edge) would miss entirely, but
+                // aggregating the full candidate distribution recovers it, matching
+                // the real SATIVA tool's own mislabels output for this dataset
+                // (run_sativa_tests/sativa_test.mis: Phylum, confidence 1.000).
+                { assert mislabels.contains('UxjAloci') },
+                // UnpCCeti is a real mislabel too (real tool: Genus, confidence 0.694);
+                // only visible once weighted across all candidates, not just the best edge.
+                { assert mislabels.contains('UnpCCeti') },
+                // UyvCanif is genuinely well-placed: its genus matches the declared
+                // taxonomy, and the only divergence is a low-confidence (~0.18) species
+                // guess among several near-identical congeners -- correctly suppressed
+                // by the default --min-lwr cutoff, not reported as a mislabel.
+                { assert !mislabels.contains('UyvCanif') },
+                { assert summary.contains('sequences scored: 5') },
+                { assert summary.contains('putative mislabels: 4') },
                 { assert snapshot(mislabels, summary).match("mislabels_and_summary") },
                 { assert process.out.versions }
             )
@@ -50,7 +66,7 @@ nextflow_process {
 
     }
 
-    test("sativa - 3 real jplace placements - stub") {
+    test("sativa - 5 real jplace placements - stub") {
 
         options "-stub"
 
@@ -61,10 +77,12 @@ nextflow_process {
                     [ id:'sativa_score_test' ],
                     [
                         file("\$projectDir/run_sativa_tests/sativa_score_test_UnpCCeti.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_UxjAloci.jplace.gz", checkIfExists: true),
+                        file("\$projectDir/run_sativa_tests/sativa_score_test_UyvCanif.jplace.gz", checkIfExists: true),
                         file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq01.jplace.gz", checkIfExists: true),
                         file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq02.jplace.gz", checkIfExists: true),
                     ],
-                    file("\$projectDir/run_sativa_tests/sativa_test.tax", checkIfExists: true),
+                    file("\$projectDir/run_sativa_tests/sativa_score_test.tax", checkIfExists: true),
                 ]
                 """
             }
