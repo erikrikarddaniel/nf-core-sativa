@@ -4,9 +4,12 @@ process SATIVASCORE {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
+    // quay.io/biocontainers/python:3.11 has no build-hash-suffixed tag to pin to (unlike
+    // real bioconda-recipe images); pin by digest instead so the underlying image can't
+    // silently drift and shift floating-point tie-breaks in SATIVASCORE's rank voting.
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.11' :
-        'quay.io/biocontainers/python:3.11' }"
+        'quay.io/biocontainers/python@sha256:b322907f8e52b2055ccad4e46848d28a4a5631b403116cc80ddf61ec8601e05e' }"
 
     input:
     // All N per-sequence jplace files for one dataset are staged under placements/
@@ -88,7 +91,11 @@ def load_taxonomy(path):
 
 def majority_taxonomy(names, tax):
     # Per-rank majority vote among the leaves neighbouring one placement edge.
-    rows = [tax[n] for n in names if n in tax]
+    # `names` is a set (from parse_jplace_tree), so iteration order depends on
+    # PYTHONHASHSEED; sort it so Counter.most_common()'s tie-breaking (first
+    # encountered wins) is deterministic across runs instead of picking a
+    # different equally-weighted rank value each time.
+    rows = [tax[n] for n in sorted(names) if n in tax]
     if not rows:
         return []
     n_ranks = min(len(r) for r in rows)

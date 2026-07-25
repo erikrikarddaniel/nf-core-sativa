@@ -4,9 +4,12 @@ process TAXONOMYTREE {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
+    // quay.io/biocontainers/python:3.11 has no build-hash-suffixed tag to pin to (unlike
+    // real bioconda-recipe images); pin by digest instead so the underlying image can't
+    // silently drift between runs.
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.11' :
-        'quay.io/biocontainers/python:3.11' }"
+        'quay.io/biocontainers/python@sha256:b322907f8e52b2055ccad4e46848d28a4a5631b403116cc80ddf61ec8601e05e' }"
 
     input:
     tuple val(meta), path(taxonomy)
