@@ -10,3 +10,20 @@ multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 fastqc/*_fastqc.{html,zip}
 pipeline_info/*.{html,json,txt,yml}
+
+# IQTREE's ML search still has run-to-run floating-point-level nondeterminism even with
+# a fixed seed and forced single-threading (see conf/modules.config) -- likely from
+# non-associative summation order in its underlying numerical library (BLAS/SIMD), which
+# no amount of seeding or thread-pinning controls from the outside. This cascades through
+# every step numerically derived from its tree/model: the LOO-pruned per-sequence trees,
+# EPA-ng's placements, and SATIVASCORE's scoring. Existence/naming is still checked via
+# stable_path -- only content hashing is skipped here. Each of these steps' actual logic
+# is covered deterministically by its own module-level tests, which use static fixtures
+# (a fixed alignment+tree, or fixed jplace files) rather than a live IQTREE run.
+iqtree/user-alignment.treefile
+iqtree/user-alignment.iqtree
+iqtree/user-alignment.log
+sativaloosplit/**
+epang/*
+sativascore/user-alignment.mislabels.tsv
+sativascore/user-alignment.summary.txt
