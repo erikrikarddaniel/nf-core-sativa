@@ -17,13 +17,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'sativa_score_test' ],
                     [
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_UnpCCeti.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_UxjAloci.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_UyvCanif.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq01.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq02.jplace.gz", checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UnpCCeti.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UxjAloci.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UyvCanif.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq01.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq02.jplace.gz', checkIfExists: true),
                     ],
-                    file("\$projectDir/run_sativa_tests/sativa_score_test.tax", checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test.tax', checkIfExists: true),
                 ]
                 """
             }
@@ -47,7 +47,7 @@ nextflow_process {
                 // (LWR ~0.03-0.09 on any individual edge) would miss entirely, but
                 // aggregating the full candidate distribution recovers it, matching
                 // the real SATIVA tool's own mislabels output for this dataset
-                // (run_sativa_tests/sativa_test.mis: Phylum, confidence 1.000).
+                // (reported: Phylum, confidence 1.000).
                 { assert mislabels.contains('UxjAloci') },
                 // UnpCCeti is a real mislabel too (real tool: Genus, confidence 0.694);
                 // only visible once weighted across all candidates, not just the best edge.
@@ -76,13 +76,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'sativa_score_test' ],
                     [
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_UnpCCeti.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_UxjAloci.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_UyvCanif.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq01.jplace.gz", checkIfExists: true),
-                        file("\$projectDir/run_sativa_tests/sativa_score_test_DupSeq02.jplace.gz", checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UnpCCeti.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UxjAloci.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UyvCanif.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq01.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq02.jplace.gz', checkIfExists: true),
                     ],
-                    file("\$projectDir/run_sativa_tests/sativa_score_test.tax", checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test.tax', checkIfExists: true),
                 ]
                 """
             }
