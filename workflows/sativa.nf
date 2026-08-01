@@ -9,6 +9,7 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sativa_pipeline'
 include { CHECKNAMECONSISTENCY   } from '../modules/local/checknameconsistency/main'
+include { RAXTAX_PREFILTER       } from '../subworkflows/local/raxtax_prefilter'
 include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 
 /*
@@ -74,13 +75,53 @@ workflow SATIVA {
     def ch_alignment_checked = CHECKNAMECONSISTENCY.out.checked.map { _meta, _tax, aln -> aln }
 
     //
+    // SUBWORKFLOW: RAXTAX_PREFILTER (optional, params.skip_raxtax to disable)
+    //
+    // Fast raxtax self-classification prefilter ahead of the expensive EPA-ng-based
+    // placement below. Sequences it flags never reach SWF_SATIVA -- they're reported
+    // directly via ch_raxtax_mislabels instead.
+    //
+    def ch_taxonomy_for_sativa
+    def ch_alignment_for_sativa
+    def ch_raxtax_mislabels
+    // Coerce explicitly: a CLI-supplied `--skip_raxtax false` arrives as the *string*
+    // "false", and Groovy's `!"false"` is false (any non-empty string is truthy) --
+    // .toBoolean() parses both real Booleans and "true"/"false" strings correctly.
+    // Confirmed empirically that nf-schema's cli_typecast (enabled just above, in
+    // PIPELINE_INITIALISATION) validates the string against the boolean schema type but
+    // does not itself replace params.skip_raxtax with a real Boolean, so this is still
+    // needed even with cli_typecast on.
+    def skip_raxtax = params.skip_raxtax.toString().toBoolean()
+    if (!skip_raxtax) {
+        RAXTAX_PREFILTER(ch_taxonomy_checked, ch_alignment_checked)
+        ch_taxonomy_for_sativa  = RAXTAX_PREFILTER.out.taxonomy
+        ch_alignment_for_sativa = RAXTAX_PREFILTER.out.alignment
+        ch_raxtax_mislabels     = RAXTAX_PREFILTER.out.mislabels
+    } else {
+        ch_taxonomy_for_sativa  = ch_taxonomy_checked
+        ch_alignment_for_sativa = ch_alignment_checked
+        ch_raxtax_mislabels     = channel.empty()
+    }
+
+    //
     // SUBWORKFLOW: SATIVA
     //
     // This implements all the logic in the workflow.
     //
     // The later two params are meant to pass a reference tree and a model file respectively. Not implemented yet.
     //
-    SWF_SATIVA(ch_taxonomy_checked, ch_alignment_checked, [], [])
+    SWF_SATIVA(ch_taxonomy_for_sativa, ch_alignment_for_sativa, [], [])
+
+    //
+    // Merge raxtax-flagged mislabels (skipped placement entirely) with SATIVASCORE's own
+    // into one final report. Both share the same TSV schema (method column distinguishes
+    // detection source), so collectFile with keepHeader can concatenate them directly --
+    // no bridging process needed just to reshape/combine two files.
+    //
+    ch_raxtax_mislabels
+        .mix(SWF_SATIVA.out.mislabels)
+        .map { _meta, tsv -> tsv }
+        .collectFile(name: 'user-alignment.mislabels.tsv', storeDir: "${outdir}/mislabels", keepHeader: true, skip: 1)
 
     //
     // MODULE: MultiQC

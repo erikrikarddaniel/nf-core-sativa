@@ -50,10 +50,10 @@
     },
     "mislabels_and_summary": {
         "content": [
-            "seq_name\toriginal_label\tpredicted_label\tlwr\tmismatch_rank\nDupSeq01\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies1\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies[2]\t0.983841\t7\nDupSeq02\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies[2]\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies1\t0.983841\t7\nUnpCCeti\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium ceti\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;Fusobacterium necrophorum subsp. funduliforme\t0.669127\t6\nUxjAloci\tBacteria;Firmicutes;Clostridia;Clostridiales;Peptostreptococcaceae;Filifactor;Filifactor alocis\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;DupSpecies1\t0.985706\t2\n",
+            "seq_name\toriginal_label\tpredicted_label\tlwr\tmismatch_rank\tmethod\nDupSeq01\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies1\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies[2]\t0.983841\t7\tsativa\nDupSeq02\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies[2]\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Leptotrichiaceae;Streptobacillus(t);DupSpecies1\t0.983841\t7\tsativa\nUnpCCeti\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium ceti\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;Fusobacterium necrophorum subsp. funduliforme\t0.669127\t6\tsativa\nUxjAloci\tBacteria;Firmicutes;Clostridia;Clostridiales;Peptostreptococcaceae;Filifactor;Filifactor alocis\tBacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;DupSpecies1\t0.985706\t2\tsativa\n",
             "sequences scored: 5\nmin_lwr threshold: 0.5\nputative mislabels: 4\n"
         ],
-        "timestamp": "2026-07-25T21:49:24.984583253",
+        "timestamp": "2026-08-01T10:29:04.914126007",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

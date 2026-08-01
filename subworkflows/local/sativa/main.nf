@@ -13,6 +13,12 @@ main.nf
         validates params, parses samplesheet → ch_samplesheet channel
   └── NFCORE_SATIVA
         └── SATIVA               (workflows/sativa.nf)  ← main logic lives here
+              ├── CHECKNAMECONSISTENCY  (modules/local/checknameconsistency/)
+              ├── RAXTAX_PREFILTER      (subworkflows/local/raxtax_prefilter/) -- optional,
+              │     params.skip_raxtax to disable; fast self-classification triage that
+              │     drops severely mislabeled sequences before this subworkflow ever sees
+              │     them, reporting them directly instead
+              ├── SATIVA (this subworkflow)
               ├── FASTQC          (modules/nf-core/fastqc/)
               └── MULTIQC         (modules/nf-core/multiqc/)
   └── PIPELINE_COMPLETION        (subworkflows/local/utils_nfcore_sativa_pipeline/main.nf)

@@ -59,6 +59,9 @@ nextflow_process {
                 { assert !mislabels.contains('UyvCanif') },
                 { assert summary.contains('sequences scored: 5') },
                 { assert summary.contains('putative mislabels: 4') },
+                // method column tags every row as sativa-detected, so it can be merged
+                // with RAXTAXFILTER's raxtax-tagged rows into one final report.
+                { assert mislabels.readLines().every { it.startsWith('seq_name') || it.endsWith('\tsativa') } },
                 { assert snapshot(mislabels, summary).match("mislabels_and_summary") },
                 { assert process.out.versions }
             )

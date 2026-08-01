@@ -29,6 +29,17 @@
                     "description": "Path to an alignment file in phylip (.phy), Clustal (.aln) or fasta format (.fa, .fasta, .mfa, .alnfaa or .alnfna).",
                     "fa_icon": "fas fa-file-alt"
                 },
+                "skip_raxtax": {
+                    "type": "boolean",
+                    "description": "Skip the raxtax prefilter and run every sequence straight through the full EPA-ng-based placement pipeline.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "raxtax_filter_rank": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Taxonomic rank at which raxtax's self-classification must agree with the declared taxonomy, counted from the most specific rank (1) upward. A sequence disagreeing at this one rank is flagged as a mislabel and skips EPA-ng placement.",
+                    "fa_icon": "fas fa-layer-group"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",

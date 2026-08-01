@@ -120,6 +120,8 @@
                 "iqtree/user-alignment.iqtree",
                 "iqtree/user-alignment.log",
                 "iqtree/user-alignment.treefile",
+                "mislabels",
+                "mislabels/user-alignment.mislabels.tsv",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
@@ -270,7 +272,7 @@
                 "guide-tree.guide.nwk:md5,d02bbee02826f3322e3833fc86702e44"
             ]
         ],
-        "timestamp": "2026-07-25T22:31:47.004015668",
+        "timestamp": "2026-08-01T11:13:04.053506588",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

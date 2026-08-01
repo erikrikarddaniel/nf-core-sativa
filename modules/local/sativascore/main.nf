@@ -181,10 +181,10 @@ for jplace_file in sorted(glob.glob('placements/*.jplace.gz')):
         })
 
 with open(opts.mislabels_tsv, 'w') as fh:
-    print('seq_name\\toriginal_label\\tpredicted_label\\tlwr\\tmismatch_rank', file=fh)
+    print('seq_name\\toriginal_label\\tpredicted_label\\tlwr\\tmismatch_rank\\tmethod', file=fh)
     for row in rows:
         if row['is_mislabel']:
-            print(f"{row['seq_name']}\\t{row['original_label']}\\t{row['predicted_label']}\\t{row['lwr']:.6f}\\t{row['mismatch_rank']}", file=fh)
+            print(f"{row['seq_name']}\\t{row['original_label']}\\t{row['predicted_label']}\\t{row['lwr']:.6f}\\t{row['mismatch_rank']}\\tsativa", file=fh)
 
 with open(opts.summary_txt, 'w') as fh:
     print(f"sequences scored: {len(rows)}", file=fh)

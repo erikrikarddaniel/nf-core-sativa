@@ -9,6 +9,8 @@ Initial release of nf-core/sativa, created with the [nf-core](https://nf-co.re/)
 
 ### `Added`
 
+- Optional `raxtax`-based prefilter ahead of the EPA-ng placement stage: quickly self-classifies the reference set and reports severely mislabeled sequences directly, skipping the more expensive placement step for them ([#NN](https://github.com/nf-core/sativa/pull/NN))
+
 ### `Fixed`
 
 ### `Dependencies`
