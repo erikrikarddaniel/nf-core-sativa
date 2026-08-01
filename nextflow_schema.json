@@ -29,6 +29,19 @@
                     "description": "Path to an alignment file in phylip (.phy), Clustal (.aln) or fasta format (.fa, .fasta, .mfa, .alnfaa or .alnfna).",
                     "fa_icon": "fas fa-file-alt"
                 },
+                "hmm": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Path to an HMM profile database, used to align --alignment via hmmalign if it turns out to be unaligned. Only required when the input is unaligned.",
+                    "help_text": "Not needed at all if --alignment is already a multiple sequence alignment (detected automatically). If the database holds more than one named profile, also set --hmm_name.",
+                    "fa_icon": "fas fa-dna"
+                },
+                "hmm_name": {
+                    "type": "string",
+                    "description": "Name of the specific profile to use from --hmm, if that database holds more than one (e.g. Barrnap's databases hold one profile per rRNA gene).",
+                    "fa_icon": "fas fa-tag"
+                },
                 "skip_raxtax": {
                     "type": "boolean",
                     "description": "Skip the raxtax prefilter and run every sequence straight through the full EPA-ng-based placement pipeline.",

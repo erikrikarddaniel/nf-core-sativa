@@ -9,6 +9,8 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sativa_pipeline'
 include { CHECKNAMECONSISTENCY   } from '../modules/local/checknameconsistency/main'
+include { EMBOSS_SEQRET          } from '../modules/nf-core/emboss/seqret/main'
+include { ENSURE_ALIGNED         } from '../subworkflows/local/ensure_aligned'
 include { RAXTAX_PREFILTER       } from '../subworkflows/local/raxtax_prefilter'
 include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 
@@ -75,6 +77,25 @@ workflow SATIVA {
     def ch_alignment_checked = CHECKNAMECONSISTENCY.out.checked.map { _meta, _tax, aln -> aln }
 
     //
+    // MODULE: Normalise the alignment to FASTA once, here, rather than separately
+    // inside RAXTAX_PREFILTER and SWF_SATIVA (previously duplicated). Also gives
+    // ENSURE_ALIGNED a single canonical format to inspect for the unaligned-input
+    // support below.
+    //
+    EMBOSS_SEQRET(ch_alignment_checked.map { [ [ id: 'user-alignment' ], it ] }, 'fasta')
+    def ch_alignment_fasta = EMBOSS_SEQRET.out.outseq.map { _meta, aln -> aln }
+
+    //
+    // SUBWORKFLOW: ENSURE_ALIGNED
+    //
+    // Transparently accepts unaligned input too, with no separate mode-switch param:
+    // already-aligned content passes straight through; unaligned content is aligned
+    // via hmmalign against params.hmm (see there for details) before continuing.
+    //
+    ENSURE_ALIGNED(ch_alignment_fasta)
+    def ch_alignment_aligned = ENSURE_ALIGNED.out.alignment
+
+    //
     // SUBWORKFLOW: RAXTAX_PREFILTER (optional, params.skip_raxtax to disable)
     //
     // Fast raxtax self-classification prefilter ahead of the expensive EPA-ng-based
@@ -93,13 +114,13 @@ workflow SATIVA {
     // needed even with cli_typecast on.
     def skip_raxtax = params.skip_raxtax.toString().toBoolean()
     if (!skip_raxtax) {
-        RAXTAX_PREFILTER(ch_taxonomy_checked, ch_alignment_checked)
+        RAXTAX_PREFILTER(ch_taxonomy_checked, ch_alignment_aligned)
         ch_taxonomy_for_sativa  = RAXTAX_PREFILTER.out.taxonomy
         ch_alignment_for_sativa = RAXTAX_PREFILTER.out.alignment
         ch_raxtax_mislabels     = RAXTAX_PREFILTER.out.mislabels
     } else {
         ch_taxonomy_for_sativa  = ch_taxonomy_checked
-        ch_alignment_for_sativa = ch_alignment_checked
+        ch_alignment_for_sativa = ch_alignment_aligned
         ch_raxtax_mislabels     = channel.empty()
     }
 

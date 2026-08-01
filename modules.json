@@ -20,6 +20,26 @@
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
+                    "gunzip": {
+                        "branch": "master",
+                        "git_sha": "0902eac3012baaf4f9ab6513c8c55acc9353c96c",
+                        "installed_by": ["modules"]
+                    },
+                    "hmmer/eslreformat": {
+                        "branch": "master",
+                        "git_sha": "f2bed902e13076698e7d59d1fedf5c083f6f17c0",
+                        "installed_by": ["modules"]
+                    },
+                    "hmmer/hmmalign": {
+                        "branch": "master",
+                        "git_sha": "f2bed902e13076698e7d59d1fedf5c083f6f17c0",
+                        "installed_by": ["modules"]
+                    },
+                    "hmmer/hmmfetch": {
+                        "branch": "master",
+                        "git_sha": "f2bed902e13076698e7d59d1fedf5c083f6f17c0",
+                        "installed_by": ["modules"]
+                    },
                     "iqtree": {
                         "branch": "master",
                         "git_sha": "55ca0738629246b23a84394e94cf50a542f6d72d",

@@ -14,6 +14,9 @@ main.nf
   └── NFCORE_SATIVA
         └── SATIVA               (workflows/sativa.nf)  ← main logic lives here
               ├── CHECKNAMECONSISTENCY  (modules/local/checknameconsistency/)
+              ├── ENSURE_ALIGNED        (subworkflows/local/ensure_aligned/) -- transparently
+              │     aligns unaligned input via hmmalign (params.hmm); already-aligned
+              │     input passes through unchanged
               ├── RAXTAX_PREFILTER      (subworkflows/local/raxtax_prefilter/) -- optional,
               │     params.skip_raxtax to disable; fast self-classification triage that
               │     drops severely mislabeled sequences before this subworkflow ever sees
@@ -34,7 +37,6 @@ main.nf
 */
 
 include { TAXONOMYTREE   } from '../../../modules/local/taxonomytree/main'
-include { EMBOSS_SEQRET  } from '../../../modules/nf-core/emboss/seqret/main'
 include { IQTREE         } from '../../../modules/nf-core/iqtree/main'
 include { SATIVALOOSPLIT } from '../../../modules/local/sativaloosplit/main'
 include { SATIVASCORE    } from '../../../modules/local/sativascore/main'
@@ -53,12 +55,11 @@ workflow SATIVA {
                   //   problematic characters (e.g. parens) by the time it gets here.
 
     ch_alignment  // channel: [ val(meta), path(alignment) ]
-                  //   Aligned, labeled sequences. FASTA, Clustal or PHYLIP; format
-                  //   is auto-detected and normalised to FASTA by EMBOSS_SEQRET
-                  //   below, since SATIVALOOSPLIT (our own Python code) only trusts
-                  //   one guaranteed format rather than trying to parse every format
-                  //   itself. IQTREE reads this take: parameter directly instead
-                  //   (it natively handles all three formats).
+                  //   Aligned, labeled sequences in FASTA format -- normalised to
+                  //   FASTA and, if it arrived unaligned, aligned via hmmalign, both
+                  //   by the caller (workflows/sativa.nf; see EMBOSS_SEQRET and
+                  //   ENSURE_ALIGNED there) before this subworkflow ever sees it.
+                  //   Both IQTREE and SATIVALOOSPLIT read it directly.
                   //   Sequence IDs must match the first column of ch_taxonomy.
 
     ch_ref_tree   // channel: [ val(meta), path(tree.nwk) ]
@@ -70,17 +71,9 @@ workflow SATIVA {
     main:
 //    def ch_versions = channel.empty()
 
-    // Normalise the input alignment to FASTA regardless of whether it arrived as
-    // FASTA, Clustal or PHYLIP. EMBOSS auto-detects the input format from content,
-    // so no format-sniffing of our own is needed here. This is only for
-    // SATIVALOOSPLIT's benefit: its hand-rolled Python parser only supports one
-    // guaranteed format. FASTA rather than PHYLIP specifically: EMBOSS's phylip
-    // writer truncates sequence names to 10 characters, silently colliding (and
-    // corrupting the alignment) for anything with longer real-world identifiers
-    // (e.g. GTDB accessions). IQTREE gets the original, unconverted alignment below
-    // instead (see there for why) rather than this FASTA version.
-    EMBOSS_SEQRET(ch_alignment.map { [ [ id: 'user-alignment' ], it ] }, 'fasta')
-    def ch_alignment_fasta = EMBOSS_SEQRET.out.outseq
+    // ch_alignment is already FASTA (normalised once by the caller); give it a meta
+    // for the joins/tuples below.
+    def ch_alignment_meta = ch_alignment.map { [ [ id: 'user-alignment' ], it ] }
 
     // ── Phase 1: Reference tree construction (epa_trainer) ────────────────────
     //
@@ -92,10 +85,8 @@ workflow SATIVA {
 
     TAXONOMYTREE(ch_taxonomy.map { it -> [ [ id: 'guide-tree' ], it ] })
 
-    // IQTREE natively auto-detects PHYLIP/FASTA/CLUSTAL/NEXUS, so it doesn't need any
-    // conversion -- feed it the original, untouched alignment directly.
     IQTREE(
-        ch_alignment.map { aln -> [ [ id: 'user-alignment' ], aln, [] ] },   // Alignment
+        ch_alignment_meta.map { meta, aln -> [ meta, aln, [] ] },           // Alignment
         [],                                                                 // tree_te
         [],                                                                 // lmclust
         [],                                                                 // mdef
@@ -143,7 +134,7 @@ workflow SATIVA {
     // dominant phase; the fan-out means Nextflow schedules up to N EPA-ng jobs
     // simultaneously once wired to EPANG_PLACE below.
 
-    SATIVALOOSPLIT(ch_alignment_fasta.join(ch_tree))
+    SATIVALOOSPLIT(ch_alignment_meta.join(ch_tree))
 
     // SATIVALOOSPLIT emits one tuple per input dataset, with the query/reference/tree
     // outputs as same-length file lists (one entry per held-out sequence).  .transpose()

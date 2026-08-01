@@ -2,6 +2,10 @@
     "-profile test": {
         "content": [
             {
+                "CHECKALIGNED": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
                 "CHECKNAMECONSISTENCY": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -30,6 +34,8 @@
                 }
             },
             [
+                "checkaligned",
+                "checkaligned/user-alignment.aligned.fasta",
                 "checknameconsistency",
                 "checknameconsistency/user-alignment.checked.phy",
                 "checknameconsistency/user-alignment.checked.tax",
@@ -265,6 +271,7 @@
                 "taxonomytree/guide-tree.guide.nwk"
             ],
             [
+                "user-alignment.aligned.fasta:md5,452d9754506eefcb9ed4891fc569f93a",
                 "user-alignment.checked.phy:md5,18b06732288ac020f53b609fc597db21",
                 "user-alignment.checked.tax:md5,f634269ab9aea1616bf9b76758f6cd44",
                 "user-alignment.fasta:md5,452d9754506eefcb9ed4891fc569f93a",
@@ -272,7 +279,7 @@
                 "guide-tree.guide.nwk:md5,d02bbee02826f3322e3833fc86702e44"
             ]
         ],
-        "timestamp": "2026-08-01T17:38:34.753001737",
+        "timestamp": "2026-08-01T20:40:59.772563454",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

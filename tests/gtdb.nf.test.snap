@@ -2,6 +2,10 @@
     "versions_raxtax_disabled": {
         "content": [
             {
+                "CHECKALIGNED": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
                 "CHECKNAMECONSISTENCY": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -30,7 +34,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T18:26:11.731289217",
+        "timestamp": "2026-08-01T20:44:58.051094468",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -39,6 +43,10 @@
     "versions_default_rank": {
         "content": [
             {
+                "CHECKALIGNED": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
                 "CHECKNAMECONSISTENCY": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -76,7 +84,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T18:29:10.711541951",
+        "timestamp": "2026-08-01T20:47:29.138344625",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -85,6 +93,10 @@
     "versions_coarse_rank": {
         "content": [
             {
+                "CHECKALIGNED": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
                 "CHECKNAMECONSISTENCY": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -122,7 +134,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T18:32:05.026041896",
+        "timestamp": "2026-08-01T20:50:10.4027153",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

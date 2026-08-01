@@ -35,11 +35,12 @@ Using evolutionary placement, it identifies sequences in the alignment that do n
 </picture>
 
 1. Check that names in the two files are consistent and do not contain problematic characters
-2. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
-3. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org)); the alignment is also normalised to `fasta` format ([EMBOSS](https://www.ebi.ac.uk/Tools/sfc/emboss_seqret/)) for the leave-one-out splitting step that follows
-4. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
-5. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
-6. Summarise the run ([MULTIQC](https://multiqc.info/))
+2. If the alignment is unaligned, align it via [hmmalign](http://hmmer.org) against an HMM profile (`--hmm`, `--hmm_name`); already-aligned input passes straight through, detected automatically -- no separate mode-switch parameter needed
+3. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
+4. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
+5. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
+6. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
+7. Summarise the run ([MULTIQC](https://multiqc.info/))
 
 ## Usage
 
@@ -57,7 +58,8 @@ UxjAloci   ?????????? ?????????? ?????????? ?????????? ?????????U
 UyvCanif   ?????????? ?????????? ?????????? ?????????? ?????????C
 ```
 
-The alignment can be either `phylip`, `clustal` or `fasta` formatted.
+The alignment can be `phylip`, `clustal` or `fasta` formatted, aligned or not.
+Unaligned input is aligned automatically via `hmmalign`; pass `--hmm` (and `--hmm_name`, if that profile database holds more than one profile) to say which HMM profile to align against.
 The taxonomy file should contain the same sequence names as the alignment, be tab-separated without a header:
 
 ```tsv
@@ -68,7 +70,7 @@ UxjAloci        Bacteria;Firmicutes;Clostridia;Clostridiales;Peptostreptococcace
 UyvCanif        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;Fusobacterium canifelinum
 ```
 
-(Parentheses in sequence names will be replaced by underscores.)
+(Sequence name characters other than letters, digits, `_`, `.`, `-`, `|` and `/` will be replaced by underscores.)
 
 Now, you can run the pipeline using:
 

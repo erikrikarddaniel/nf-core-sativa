@@ -1,0 +1,91 @@
+nextflow_workflow {
+
+    name "Test Subworkflow ENSURE_ALIGNED"
+    script "../main.nf"
+    workflow "ENSURE_ALIGNED"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "subworkflows/ensure_aligned"
+    tag "sativa"
+
+    test("sativa - already aligned, passes through unchanged") {
+
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.fasta', checkIfExists: true))
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def aligned = path(workflow.out.alignment[0]).text
+
+            assertAll(
+                // Content preserved exactly -- no HMM step should have run at all.
+                { assert aligned.contains('>SeqA') },
+                { assert aligned.contains('ACGTACGTAC') },
+            )
+        }
+
+    }
+
+    test("sativa - unaligned, realigned via hmmalign") {
+
+        when {
+            params {
+                // Hardcoded rather than params.pipelines_testdata_base_path + '...':
+                // that param isn't resolved yet this early in nf-test's params {}
+                // override block (comes out literally null here), unlike inside the
+                // later workflow {} string block below where it works fine.
+                hmm      = 'https://raw.githubusercontent.com/erikrikarddaniel/test-datasets/' + '/sativa/testdata/barrnap_arc.hmm'
+                hmm_name = '16S_rRNA'
+            }
+            workflow {
+                """
+                input[0] = Channel.of(file(params.pipelines_testdata_base_path + '/sativa/testdata/checkaligned_test_unaligned.fasta', checkIfExists: true))
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def content = path(workflow.out.alignment[0]).text
+            def seqLengths = content.split('>').findAll { it.trim() }.collect { entry ->
+                entry.readLines().drop(1).join('').trim().length()
+            }
+
+            assertAll(
+                { assert content.contains('>SeqA') },
+                { assert content.contains('>SeqB') },
+                { assert content.contains('>SeqC') },
+                // All three input sequences (originally 16/10/20bp) now share one
+                // column count -- the whole point of running them through hmmalign.
+                { assert seqLengths.toSet().size() == 1 },
+            )
+        }
+
+    }
+
+    test("sativa - unaligned without --hmm fails clearly") {
+
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(file(params.pipelines_testdata_base_path + '/sativa/testdata/checkaligned_test_unaligned.fasta', checkIfExists: true))
+                """
+            }
+        }
+
+        then {
+            assert !workflow.success
+            assert workflow.stdout.toString().contains('--hmm') || workflow.stderr.toString().contains('--hmm')
+        }
+
+    }
+
+}

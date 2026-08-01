@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "ensure_aligned"
+description: |
+  Transparently accept unaligned input alongside already-aligned input, with no
+  separate mode-switch param. Content already the same length passes through
+  unchanged; content that isn't is aligned via hmmalign against an HMM profile
+  (params.hmm, optionally a single named profile from it via params.hmm_name),
+  then converted back to plain FASTA.
+keywords:
+  - alignment
+  - hmmer
+  - hmmalign
+  - sativa
+components:
+  - checkaligned
+  - hmmer/hmmfetch
+  - hmmer/hmmalign
+  - hmmer/eslreformat
+  - gunzip
+input:
+  - ch_alignment:
+      type: file
+      description: |
+        Sequences in FASTA format, aligned or not
+        Structure: path(alignment)
+      pattern: "*.{fa,fasta,fna,alnfna,mfa}"
+output:
+  - alignment:
+      type: file
+      description: |
+        The input, aligned either way (passed through unchanged if it already was)
+        Structure: path(alignment.fasta)
+      pattern: "*.fasta"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@erikrikarddaniel"
+maintainers:
+  - "@erikrikarddaniel"

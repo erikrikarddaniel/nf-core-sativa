@@ -5,11 +5,13 @@
     self-classify the reference set and catch severely mislabeled sequences early.
 
     Workflow:
-      1. Normalise the alignment to FASTA                 (EMBOSS_SEQRET)
-      2. Degap + rewrite headers to raxtax's format        (RAXTAXFORMAT)
-      3. Self-classify (database == query)                 (RAXTAX)
-      4. Keep the best hit per query, flag disagreements
+      1. Degap + rewrite headers to raxtax's format        (RAXTAXFORMAT)
+      2. Self-classify (database == query)                 (RAXTAX)
+      3. Keep the best hit per query, flag disagreements
          at params.raxtax_filter_rank                       (RAXTAXFILTER)
+
+    The alignment is expected to already be normalised to FASTA by the caller
+    (workflows/sativa.nf) -- this subworkflow no longer does that itself.
 
     Sequences RAXTAXFILTER flags never reach EPA-ng placement: they're reported
     directly in the final mislabels output (see workflows/sativa.nf), tagged
@@ -17,7 +19,6 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { EMBOSS_SEQRET } from '../../../modules/nf-core/emboss/seqret/main'
 include { RAXTAXFORMAT  } from '../../../modules/local/raxtaxformat/main'
 include { RAXTAX        } from '../../../modules/local/raxtax/main'
 include { RAXTAXFILTER  } from '../../../modules/local/raxtaxfilter/main'
@@ -26,19 +27,13 @@ workflow RAXTAX_PREFILTER {
 
     take:
     ch_taxonomy  // channel: taxonomy file (seq_name<TAB>rank1;rank2;...)
-    ch_alignment // channel: alignment file, FASTA, Clustal or PHYLIP (auto-detected)
+    ch_alignment // channel: alignment file, already normalised to FASTA by the caller
 
     main:
     // Give both inputs a shared meta so they can be joined back together below;
     // matches the fixed 'user-alignment' id used throughout subworkflows/local/sativa.
-    def ch_meta_taxonomy  = ch_taxonomy.map  { [ [ id: 'user-alignment' ], it ] }
-    def ch_meta_alignment = ch_alignment.map { [ [ id: 'user-alignment' ], it ] }
-
-    // Normalise to FASTA regardless of input format, same rationale as the SATIVA
-    // subworkflow's own EMBOSS_SEQRET call: downstream Python code shouldn't have to
-    // parse every alignment format itself.
-    EMBOSS_SEQRET(ch_meta_alignment, 'fasta')
-    def ch_alignment_fasta = EMBOSS_SEQRET.out.outseq
+    def ch_meta_taxonomy   = ch_taxonomy.map  { [ [ id: 'user-alignment' ], it ] }
+    def ch_alignment_fasta = ch_alignment.map { [ [ id: 'user-alignment' ], it ] }
 
     // Degap and rewrite headers to raxtax's `>id;tax=<lineage>;` form.
     RAXTAXFORMAT(ch_alignment_fasta.join(ch_meta_taxonomy))

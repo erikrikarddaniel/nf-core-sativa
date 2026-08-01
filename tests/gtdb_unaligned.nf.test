@@ -1,0 +1,40 @@
+nextflow_pipeline {
+
+    name "Test pipeline with real, unaligned GTDB archaeal 16S data"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_gtdb_unaligned"
+
+    test("-profile test_gtdb_unaligned") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def mislabels = path("$outputDir/mislabels/user-alignment.mislabels.tsv").text
+
+            assertAll(
+                // The hmmalign path ran at all (not silently skipped as already-aligned).
+                // hmmfetch/hmmalign/eslreformat all publish under the same "hmmer"
+                // directory (the pipeline's generic publishDir naming takes everything
+                // before the process name's first underscore).
+                { assert new File("$outputDir/checkaligned").exists() },
+                { assert new File("$outputDir/hmmer").exists() },
+                { assert new File("$outputDir/gunzip").exists() },
+                // Same real dataset, same guaranteed positive control, as the pre-aligned
+                // test_gtdb tests -- confirms hmmalign produced a genuinely usable
+                // alignment, not just one that merely completes.
+                { assert mislabels.contains('DupHaloA') },
+                { assert mislabels.contains('DupSulfoA') },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions") },
+            )
+        }
+
+    }
+
+}
