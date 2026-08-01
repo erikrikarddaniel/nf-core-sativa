@@ -26,20 +26,23 @@ process CHECKNAMECONSISTENCY {
     // original source file through the symlink.
     """
     python3 - "${taxonomy}" "${alignment}" "${prefix}.checked.tax" "${prefix}.checked.${alignment.extension}" << 'PYEOF'
+import re
 import sys
 import Bio
 from Bio import SeqIO
 
 taxonomy_in, alignment_in, taxonomy_out, alignment_out = sys.argv[1:5]
 
-# List of characters that are difficult for some tools (e.g. Newick parens);
-# extend this as more problem characters turn up.
-PROBLEMATIC_CHARS = ['(', ')']
+# IQTREE's own tree-writer silently replaces almost every non-alphanumeric
+# character with '_' when writing leaf names (empirically confirmed: parens,
+# '~', '#', and everything else tried except '|' and '/' get mangled this
+# way). Left alone here, that would desync alignment/taxonomy names from the
+# tree's leaf names downstream, so match IQTREE's own behaviour up front
+# rather than chasing individual problem characters as they turn up.
+UNSAFE_CHARS = re.compile(r'[^A-Za-z0-9_.|/-]')
 
 def sanitize(name):
-    for ch in PROBLEMATIC_CHARS:
-        name = name.replace(ch, '_')
-    return name
+    return UNSAFE_CHARS.sub('_', name)
 
 def find_duplicates(names):
     seen, dups = set(), set()

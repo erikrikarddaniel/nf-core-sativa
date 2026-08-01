@@ -34,6 +34,16 @@ nextflow_process {
                 { assert taxonomy.contains('SeqB_1_') },
                 { assert alignment.contains('SeqB_1_') },
                 { assert !taxonomy.contains('(') && !taxonomy.contains(')') },
+                // '~' and '#' are rewritten too: IQTREE's own tree-writer silently
+                // replaces almost every non-alphanumeric character with '_', so leaving
+                // any of them as-is here would desync alignment/taxonomy names from the
+                // eventual tree's leaf names downstream.
+                { assert taxonomy.contains('SeqD_2') },
+                { assert alignment.contains('SeqD_2') },
+                { assert taxonomy.contains('SeqE_3') },
+                { assert alignment.contains('SeqE_3') },
+                { assert !taxonomy.contains('~') && !alignment.contains('~') },
+                { assert !taxonomy.contains('#') && !alignment.contains('#') },
                 { assert !alignment.contains('(') && !alignment.contains(')') },
                 // Untouched names pass through unchanged
                 { assert taxonomy.contains('SeqA') },

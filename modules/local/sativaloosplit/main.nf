@@ -33,9 +33,11 @@ os.makedirs('referencealn', exist_ok=True)
 os.makedirs('referencetree', exist_ok=True)
 
 # The subworkflow normalises whatever format the pipeline was given (FASTA,
-# Clustal, PHYLIP) to PHYLIP via EMBOSS_SEQRET before calling this module, so
-# there is exactly one format to parse here.
-records = list(SeqIO.parse(alignment_file, 'phylip-relaxed'))
+# Clustal, PHYLIP) to FASTA via EMBOSS_SEQRET before calling this module, so
+# there is exactly one format to parse here. Not PHYLIP: EMBOSS's phylip writer
+# truncates sequence names to 10 characters, silently colliding (and corrupting
+# the alignment) for anything with longer real-world identifiers.
+records = list(SeqIO.parse(alignment_file, 'fasta'))
 if not records:
     sys.exit('No sequences found in: ' + alignment_file)
 

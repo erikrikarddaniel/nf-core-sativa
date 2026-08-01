@@ -1,0 +1,131 @@
+{
+    "versions_raxtax_disabled": {
+        "content": [
+            {
+                "CHECKNAMECONSISTENCY": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "EMBOSS_SEQRET": {
+                    "emboss": "6.6.0.0"
+                },
+                "EPANG_PLACE": {
+                    "epa-ng": "0.3.8"
+                },
+                "IQTREE": {
+                    "iqtree": "2.4.0"
+                },
+                "SATIVALOOSPLIT": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "SATIVASCORE": {
+                    "python": "3.11.10"
+                },
+                "TAXONOMYTREE": {
+                    "python": "3.11.10"
+                },
+                "Workflow": {
+                    "nf-core/sativa": "v1.0.0dev"
+                }
+            }
+        ],
+        "timestamp": "2026-08-01T18:26:11.731289217",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "versions_default_rank": {
+        "content": [
+            {
+                "CHECKNAMECONSISTENCY": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "EMBOSS_SEQRET": {
+                    "emboss": "6.6.0.0"
+                },
+                "EPANG_PLACE": {
+                    "epa-ng": "0.3.8"
+                },
+                "IQTREE": {
+                    "iqtree": "2.4.0"
+                },
+                "RAXTAX": {
+                    "raxtax": "1.6.0"
+                },
+                "RAXTAXFILTER": {
+                    "python": "3.12.12"
+                },
+                "RAXTAXFORMAT": {
+                    "python": "3.12.12"
+                },
+                "SATIVALOOSPLIT": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "SATIVASCORE": {
+                    "python": "3.11.10"
+                },
+                "TAXONOMYTREE": {
+                    "python": "3.11.10"
+                },
+                "Workflow": {
+                    "nf-core/sativa": "v1.0.0dev"
+                }
+            }
+        ],
+        "timestamp": "2026-08-01T18:29:10.711541951",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "versions_coarse_rank": {
+        "content": [
+            {
+                "CHECKNAMECONSISTENCY": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "EMBOSS_SEQRET": {
+                    "emboss": "6.6.0.0"
+                },
+                "EPANG_PLACE": {
+                    "epa-ng": "0.3.8"
+                },
+                "IQTREE": {
+                    "iqtree": "2.4.0"
+                },
+                "RAXTAX": {
+                    "raxtax": "1.6.0"
+                },
+                "RAXTAXFILTER": {
+                    "python": "3.12.12"
+                },
+                "RAXTAXFORMAT": {
+                    "python": "3.12.12"
+                },
+                "SATIVALOOSPLIT": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "SATIVASCORE": {
+                    "python": "3.11.10"
+                },
+                "TAXONOMYTREE": {
+                    "python": "3.11.10"
+                },
+                "Workflow": {
+                    "nf-core/sativa": "v1.0.0dev"
+                }
+            }
+        ],
+        "timestamp": "2026-08-01T18:32:05.026041896",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

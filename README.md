@@ -36,7 +36,7 @@ Using evolutionary placement, it identifies sequences in the alignment that do n
 
 1. Check that names in the two files are consistent and do not contain problematic characters
 2. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
-3. Convert the alignment file to `phylip` format ([EMBOSS](https://www.ebi.ac.uk/Tools/sfc/emboss_seqret/)) and create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
+3. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org)); the alignment is also normalised to `fasta` format ([EMBOSS](https://www.ebi.ac.uk/Tools/sfc/emboss_seqret/)) for the leave-one-out splitting step that follows
 4. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
 5. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
 6. Summarise the run ([MULTIQC](https://multiqc.info/))

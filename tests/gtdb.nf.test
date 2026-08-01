@@ -1,0 +1,96 @@
+nextflow_pipeline {
+
+    name "Test pipeline with real GTDB archaeal 16S data"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_gtdb"
+
+    test("-profile test_gtdb, raxtax disabled") {
+
+        when {
+            params {
+                outdir      = "$outputDir"
+                skip_raxtax = true
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def mislabels = path("$outputDir/mislabels/user-alignment.mislabels.tsv").text
+            def summary   = path("$outputDir/sativascore/user-alignment.summary.txt").text
+
+            assertAll(
+                // Every sequence goes through EPA-ng placement and SATIVASCORE directly;
+                // no raxtax step runs at all.
+                { assert !new File("$outputDir/raxtaxformat").exists() },
+                { assert summary.contains('sequences scored: 121') },
+                // DupHaloA/DupSulfoA is a deliberate swapped-label pair (maximally
+                // divergent phyla) -- an unambiguous positive control that SATIVASCORE's
+                // full phylogenetic placement must catch even without raxtax's help.
+                { assert mislabels.contains('DupHaloA') },
+                { assert mislabels.contains('DupSulfoA') },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_raxtax_disabled") },
+            )
+        }
+
+    }
+
+    test("-profile test_gtdb, raxtax default rank (species)") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def mislabels = path("$outputDir/mislabels/user-alignment.mislabels.tsv").text
+
+            assertAll(
+                { assert new File("$outputDir/raxtaxformat").exists() },
+                // The swapped-label pair disagrees with raxtax's self-classification at
+                // every rank, so it's caught by raxtax directly -- never reaching EPA-ng.
+                { assert mislabels =~ /DupHaloA[^\n]*\traxtax/ },
+                { assert mislabels =~ /DupSulfoA[^\n]*\traxtax/ },
+                // Haloferax prahovense's best raxtax hit is its sister species H.
+                // volcanii: genus agrees, species doesn't -- flagged at the default
+                // (species-level) rank.
+                { assert mislabels =~ /Haloferax prahovense[^\n]*\traxtax/ },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_default_rank") },
+            )
+        }
+
+    }
+
+    test("-profile test_gtdb, raxtax coarse rank (genus)") {
+
+        when {
+            params {
+                outdir              = "$outputDir"
+                raxtax_filter_rank  = 2
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def mislabels = path("$outputDir/mislabels/user-alignment.mislabels.tsv").text
+
+            assertAll(
+                // Still caught: disagrees with raxtax at genus and every coarser rank too.
+                { assert mislabels =~ /DupHaloA[^\n]*\traxtax/ },
+                { assert mislabels =~ /DupSulfoA[^\n]*\traxtax/ },
+                // No longer flagged by raxtax at genus level (Haloferax matches its
+                // sister species' genus) -- proves the single-check-point rank semantics
+                // at the whole-pipeline level, not just in RAXTAXFILTER's own unit test.
+                { assert !(mislabels =~ /Haloferax prahovense[^\n]*\traxtax/) },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_coarse_rank") },
+            )
+        }
+
+    }
+
+}

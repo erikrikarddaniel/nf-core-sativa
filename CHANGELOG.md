@@ -10,8 +10,13 @@ Initial release of nf-core/sativa, created with the [nf-core](https://nf-co.re/)
 ### `Added`
 
 - Optional `raxtax`-based prefilter ahead of the EPA-ng placement stage: quickly self-classifies the reference set and reports severely mislabeled sequences directly, skipping the more expensive placement step for them ([#NN](https://github.com/nf-core/sativa/pull/NN))
+- `test_gtdb` profile and pipeline-level tests using a curated, real archaeal 16S dataset from GTDB, exercising the pipeline on full-length real-world sequences rather than the small structural fixtures used elsewhere ([#NN](https://github.com/nf-core/sativa/pull/NN))
 
 ### `Fixed`
+
+- `CHECKNAMECONSISTENCY` now rewrites any character outside a safe set (was a small, growing blocklist), preventing real-world sequence identifiers (e.g. GTDB's `ACCESSION~CONTIG` names) from desyncing between the alignment/taxonomy and the tree IQTREE builds, which silently mangles the same characters in leaf names ([#NN](https://github.com/nf-core/sativa/pull/NN))
+- `IQTREE`'s model search is now restricted to the GTR family (`-mset GTR`): ModelFinder could otherwise pick a model name (e.g. `K2P`) that EPA-ng's `--model` doesn't recognise, aborting placement ([#NN](https://github.com/nf-core/sativa/pull/NN))
+- `SATIVALOOSPLIT` now consumes FASTA instead of PHYLIP: EMBOSS's phylip writer truncates sequence names to 10 characters, silently colliding for longer real-world identifiers ([#NN](https://github.com/nf-core/sativa/pull/NN))
 
 ### `Dependencies`
 

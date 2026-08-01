@@ -34,7 +34,7 @@
                 "checknameconsistency/user-alignment.checked.phy",
                 "checknameconsistency/user-alignment.checked.tax",
                 "emboss",
-                "emboss/user-alignment.phylip",
+                "emboss/user-alignment.fasta",
                 "epang",
                 "epang/user-alignment_0001.epa_info.log",
                 "epang/user-alignment_0001.epa_result.jplace.gz",
@@ -267,12 +267,12 @@
             [
                 "user-alignment.checked.phy:md5,18b06732288ac020f53b609fc597db21",
                 "user-alignment.checked.tax:md5,f634269ab9aea1616bf9b76758f6cd44",
-                "user-alignment.phylip:md5,461192d309b8f9c87bb21f4dcb5c250f",
+                "user-alignment.fasta:md5,452d9754506eefcb9ed4891fc569f93a",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
                 "guide-tree.guide.nwk:md5,d02bbee02826f3322e3833fc86702e44"
             ]
         ],
-        "timestamp": "2026-08-01T11:13:04.053506588",
+        "timestamp": "2026-08-01T17:38:34.753001737",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

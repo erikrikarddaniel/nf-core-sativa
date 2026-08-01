@@ -54,9 +54,11 @@ workflow SATIVA {
 
     ch_alignment  // channel: [ val(meta), path(alignment) ]
                   //   Aligned, labeled sequences. FASTA, Clustal or PHYLIP; format
-                  //   is auto-detected and normalised to PHYLIP by EMBOSS_SEQRET
+                  //   is auto-detected and normalised to FASTA by EMBOSS_SEQRET
                   //   below, since SATIVALOOSPLIT (our own Python code) only trusts
-                  //   PHYLIP rather than trying to parse every format itself.
+                  //   one guaranteed format rather than trying to parse every format
+                  //   itself. IQTREE reads this take: parameter directly instead
+                  //   (it natively handles all three formats).
                   //   Sequence IDs must match the first column of ch_taxonomy.
 
     ch_ref_tree   // channel: [ val(meta), path(tree.nwk) ]
@@ -68,14 +70,17 @@ workflow SATIVA {
     main:
 //    def ch_versions = channel.empty()
 
-    // Normalise the input alignment to PHYLIP regardless of whether it arrived as
+    // Normalise the input alignment to FASTA regardless of whether it arrived as
     // FASTA, Clustal or PHYLIP. EMBOSS auto-detects the input format from content,
-    // so no format-sniffing of our own is needed here. IQTREE (a compiled tool) can
-    // likely handle any of the three directly, but SATIVALOOSPLIT's hand-rolled
-    // Python parser only supports PHYLIP, so every consumer downstream is kept on
-    // one guaranteed format instead.
-    EMBOSS_SEQRET(ch_alignment.map { [ [ id: 'user-alignment' ], it ] }, 'phylip')
-    def ch_alignment_phylip = EMBOSS_SEQRET.out.outseq
+    // so no format-sniffing of our own is needed here. This is only for
+    // SATIVALOOSPLIT's benefit: its hand-rolled Python parser only supports one
+    // guaranteed format. FASTA rather than PHYLIP specifically: EMBOSS's phylip
+    // writer truncates sequence names to 10 characters, silently colliding (and
+    // corrupting the alignment) for anything with longer real-world identifiers
+    // (e.g. GTDB accessions). IQTREE gets the original, unconverted alignment below
+    // instead (see there for why) rather than this FASTA version.
+    EMBOSS_SEQRET(ch_alignment.map { [ [ id: 'user-alignment' ], it ] }, 'fasta')
+    def ch_alignment_fasta = EMBOSS_SEQRET.out.outseq
 
     // ── Phase 1: Reference tree construction (epa_trainer) ────────────────────
     //
@@ -87,8 +92,10 @@ workflow SATIVA {
 
     TAXONOMYTREE(ch_taxonomy.map { it -> [ [ id: 'guide-tree' ], it ] })
 
+    // IQTREE natively auto-detects PHYLIP/FASTA/CLUSTAL/NEXUS, so it doesn't need any
+    // conversion -- feed it the original, untouched alignment directly.
     IQTREE(
-        ch_alignment_phylip.map { meta, aln -> [ meta, aln, [] ] },         // Alignment
+        ch_alignment.map { aln -> [ [ id: 'user-alignment' ], aln, [] ] },   // Alignment
         [],                                                                 // tree_te
         [],                                                                 // lmclust
         [],                                                                 // mdef
@@ -136,7 +143,7 @@ workflow SATIVA {
     // dominant phase; the fan-out means Nextflow schedules up to N EPA-ng jobs
     // simultaneously once wired to EPANG_PLACE below.
 
-    SATIVALOOSPLIT(ch_alignment_phylip.join(ch_tree))
+    SATIVALOOSPLIT(ch_alignment_fasta.join(ch_tree))
 
     // SATIVALOOSPLIT emits one tuple per input dataset, with the query/reference/tree
     // outputs as same-length file lists (one entry per held-out sequence).  .transpose()

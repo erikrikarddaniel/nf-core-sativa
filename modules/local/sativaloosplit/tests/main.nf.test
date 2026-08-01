@@ -16,7 +16,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'sativa_loo_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.phylip', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.fasta', checkIfExists: true),
                     file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.nwk', checkIfExists: true),
                 ]
                 """
@@ -59,7 +59,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'sativa_loo_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.phylip', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.fasta', checkIfExists: true),
                     file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.nwk', checkIfExists: true),
                 ]
                 """
