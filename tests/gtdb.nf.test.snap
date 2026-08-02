@@ -102,6 +102,46 @@
             "nextflow": "26.04.6"
         }
     },
+    "versions_sativa_skipped": {
+        "content": [
+            {
+                "CHECKALIGNED": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "CHECKNAMECONSISTENCY": {
+                    "python": "3.12.12",
+                    "biopython": 1.84
+                },
+                "EMBOSS_SEQRET": {
+                    "emboss": "6.6.0.0"
+                },
+                "GAPFILTER": {
+                    "python": "3.12.12"
+                },
+                "RAXTAX": {
+                    "raxtax": "1.6.0"
+                },
+                "RAXTAXFILTER": {
+                    "python": "3.12.12"
+                },
+                "RAXTAXFORMAT": {
+                    "python": "3.12.12"
+                },
+                "RESOLVETAXONOMY": {
+                    "python": "3.12.12"
+                },
+                "Workflow": {
+                    "nf-core/sativa": "v1.0.0dev"
+                }
+            }
+        ],
+        "timestamp": "2026-08-02T15:02:03.8280175",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
     "versions_coarse_rank": {
         "content": [
             {

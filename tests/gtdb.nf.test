@@ -95,4 +95,38 @@ nextflow_pipeline {
 
     }
 
+    test("-profile test_gtdb, sativa skipped") {
+
+        when {
+            params {
+                outdir      = "$outputDir"
+                skip_sativa = true
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def mislabels = path("$outputDir/mislabels/user-alignment.mislabels.tsv").text
+
+            assertAll(
+                // raxtax prefilter still runs as configured (default: on)...
+                { assert new File("$outputDir/raxtaxformat").exists() },
+                { assert mislabels =~ /DupHaloA[^\n]*\traxtax/ },
+                { assert mislabels =~ /DupSulfoA[^\n]*\traxtax/ },
+                // ...but the phylogenetic placement subworkflow never runs at all: no
+                // reference tree, no leave-one-out placement, no scoring. This is the
+                // whole point of --skip_sativa -- a pure taxonomy-resolution/alignment/
+                // prefilter QC run, without the much more expensive EPA-ng-based step.
+                { assert !new File("$outputDir/taxonomytree").exists() },
+                { assert !new File("$outputDir/iqtree").exists() },
+                { assert !new File("$outputDir/sativaloosplit").exists() },
+                { assert !new File("$outputDir/epang").exists() },
+                { assert !new File("$outputDir/sativascore").exists() },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_sativa_skipped") },
+            )
+        }
+
+    }
+
 }

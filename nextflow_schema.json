@@ -78,6 +78,12 @@
                     "help_text": "Unlike an already-aligned reference set, a masked hmmalign-derived alignment's width is fixed by the HMM profile itself, so real full-length sequences cluster tightly near full coverage -- a higher default than --min_nongap correctly separates them from genuinely partial sequences instead of barely filtering anything.",
                     "fa_icon": "fas fa-ruler"
                 },
+                "skip_sativa": {
+                    "type": "boolean",
+                    "description": "Skip the phylogenetic placement subworkflow (reference tree, leave-one-out placement, scoring) entirely.",
+                    "help_text": "Turns the rest of the pipeline into a general-purpose taxonomy-resolution/alignment/prefilter QC tool: taxonomy resolution, name-consistency checking, optional alignment (via hmmalign) and gap/profile-coverage filtering, and the optional raxtax prefilter all still run as configured. The final mislabels report then contains only raxtax-flagged mislabels (or is empty if --skip_raxtax is also set) -- no EPA-ng-based placement is performed. The cleaned, filtered alignment and taxonomy are still published, under whichever upstream step (raxtax prefilter, gap/profile-coverage filter, or name-consistency check) produced them last.",
+                    "fa_icon": "fas fa-forward"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",

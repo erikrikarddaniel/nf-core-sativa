@@ -31,6 +31,7 @@ workflow SATIVA {
     skip_raxtax        // value:   skip the raxtax prefilter?
     skip_gapfilter     // value:   skip the gap filter (already-aligned input)?
     skip_profile_cover // value:   skip the profile-coverage filter (hmmalign-derived input)?
+    skip_sativa        // value:   skip the phylogenetic placement subworkflow entirely?
     hmm                // value:   path to an HMM profile database, or null/empty if not needed
     hmm_name           // value:   name of a specific profile within hmm, or null/empty
     multiqc_config
@@ -207,13 +208,27 @@ workflow SATIVA {
     }
 
     //
-    // SUBWORKFLOW: SATIVA
+    // SUBWORKFLOW: SATIVA (optional, skip_sativa to disable)
     //
-    // This implements all the logic in the workflow.
+    // This implements all the logic in the workflow: builds the reference tree,
+    // leave-one-out places every sequence back into it, and scores each one.
+    // Skipping it turns the rest of the pipeline into a general-purpose taxonomy-
+    // resolution/alignment/prefilter QC tool -- e.g. to get a cleaned, filtered
+    // alignment+taxonomy pair (already published by whichever upstream module
+    // produced it last) or raxtax-only mislabels, without the much more expensive
+    // EPA-ng-based placement step.
     //
-    // The later two params are meant to pass a reference tree and a model file respectively. Not implemented yet.
+    // The later two SWF_SATIVA params are meant to pass a reference tree and a
+    // model file respectively. Not implemented yet.
     //
-    SWF_SATIVA(ch_taxonomy_for_sativa, ch_alignment_for_sativa, [], [])
+    def ch_sativa_mislabels
+    def run_sativa = !skip_sativa.toString().toBoolean()
+    if (run_sativa) {
+        SWF_SATIVA(ch_taxonomy_for_sativa, ch_alignment_for_sativa, [], [])
+        ch_sativa_mislabels = SWF_SATIVA.out.mislabels
+    } else {
+        ch_sativa_mislabels = channel.empty()
+    }
 
     //
     // Merge raxtax-flagged mislabels (skipped placement entirely) with SATIVASCORE's own
@@ -222,7 +237,7 @@ workflow SATIVA {
     // no bridging process needed just to reshape/combine two files.
     //
     ch_raxtax_mislabels
-        .mix(SWF_SATIVA.out.mislabels)
+        .mix(ch_sativa_mislabels)
         .map { _meta, tsv -> tsv }
         .collectFile(name: 'user-alignment.mislabels.tsv', storeDir: "${outdir}/mislabels", keepHeader: true, skip: 1)
 

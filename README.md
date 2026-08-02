@@ -37,12 +37,13 @@ Using evolutionary placement, it identifies sequences in the alignment that do n
 1. Resolve taxonomy: from `--taxonomy` if given, otherwise derived from `--sequences` record headers instead (GTDB-style: `>id taxonomy;string`); if both are present, the file wins, with a warning rather than silently ignoring the header text
 2. Check that names in the two are consistent and do not contain problematic characters
 3. If the sequences are unaligned, align them via [hmmalign](http://hmmer.org) against an HMM profile (`--hmm`, `--hmm_name`); already-aligned input passes straight through, detected automatically -- no separate mode-switch parameter needed
-4. Filter out sequences with too high a proportion of alignment gaps to place reliably, reporting them separately rather than silently dropping them (disable with `--skip_gapfilter`; tune the threshold with `--min_nongap`)
+4. Filter out sequences too short/incomplete to place reliably, reporting them separately rather than silently dropping them: by non-gap proportion for already-aligned input (disable with `--skip_gapfilter`; tune with `--min_nongap`), or by HMM profile coverage for hmmalign-derived input (disable with `--skip_profile_cover`; tune with `--min_profile_cover`)
 5. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
-6. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
-7. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
-8. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
-9. Summarise the run ([MULTIQC](https://multiqc.info/))
+6. Optionally perform phylogenetic placement (disable entirely with `--skip_sativa`, turning the pipeline into a taxonomy-resolution/alignment/prefilter QC tool -- steps 1-5 above still run as configured):
+   1. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
+   2. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
+   3. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
+7. Summarise the run ([MULTIQC](https://multiqc.info/))
 
 ## Usage
 

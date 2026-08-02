@@ -44,6 +44,7 @@ workflow NFCORE_SATIVA {
         params.skip_raxtax,
         params.skip_gapfilter,
         params.skip_profile_cover,
+        params.skip_sativa,
         params.hmm,
         params.hmm_name,
         params.multiqc_config,
