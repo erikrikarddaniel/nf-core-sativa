@@ -1,0 +1,106 @@
+%%
+%% Source for docs/images/nf-core-sativa_metro_map_{light,dark}.svg.
+%% Rendered with nf-metro (https://github.com/pinin4fjords/nf-metro), e.g.:
+%%   pip install nf-metro   # or: conda create -n nf-metro -c bioconda nf-metro
+%%   nf-metro render nf-core-sativa_metro_map.mmd --theme nfcore --mode light \
+%%     --embed-font --logo ./nf-core-sativa_logo_light.png \
+%%     --no-chrome-css --no-dark-mode-css -o nf-core-sativa_metro_map_light.svg
+%%   nf-metro render nf-core-sativa_metro_map.mmd --theme nfcore --mode dark \
+%%     --embed-font --logo ./nf-core-sativa_logo_dark.png \
+%%     --no-chrome-css --no-dark-mode-css -o nf-core-sativa_metro_map_dark.svg
+%% --no-chrome-css/--no-dark-mode-css: bakes fully static colours (no CSS
+%% var()/light-dark()) since these are two separate static files, not one
+%% runtime-adaptive SVG -- var()/light-dark() render fine in real browsers but
+%% not in older SVG tooling (e.g. Inkscape), confirmed empirically.
+%%
+
+%%metro title: nf-core/sativa
+%%metro style: nfcore
+
+%%metro line: main | Main flow | #24B064
+%%metro line: unaligned | Unaligned input | #E67E22 | dashed
+%%metro line: raxtax_flagged | raxtax-flagged mislabel | #C0392B | dashed
+
+%%metro file: seq_in | FASTA | Sequences
+%%metro file: tax_in | TSV | Taxonomy (optional)
+%%metro file: hmm_in | HMM | HMM profile (optional)
+%%metro file: mislabels_raxtax_out | TSV | Mislabels (raxtax)
+%%metro file: mislabels_out | TSV | Mislabels
+%%metro file: report_out | HTML | MultiQC report
+
+%%metro off_track: mislabels_raxtax_out
+
+%%metro process: resolvetaxonomy | RESOLVETAXONOMY
+%%metro process: checkname | CHECKNAMECONSISTENCY
+%%metro process: emboss | EMBOSS_SEQRET
+%%metro process: checkaligned | ENSURE_ALIGNED:CHECKALIGNED
+%%metro process: hmmalign | ENSURE_ALIGNED:(HMMER_.*|GUNZIP)
+%%metro process: gapfilter | GAPFILTER
+%%metro process: raxtax | RAXTAX_PREFILTER:.*
+%%metro process: taxonomytree | SWF_SATIVA:TAXONOMYTREE
+%%metro process: iqtree | SWF_SATIVA:IQTREE
+%%metro process: loosplit | SWF_SATIVA:SATIVALOOSPLIT
+%%metro process: epang | SWF_SATIVA:EPANG_PLACE
+%%metro process: sativascore | SWF_SATIVA:SATIVASCORE
+%%metro process: multiqc | MULTIQC
+
+graph LR
+    subgraph resolve [Input resolution]
+        seq_in[ ]
+        tax_in[ ]
+        resolvetaxonomy[RESOLVETAXONOMY]
+        checkname[CHECKNAMECONSISTENCY]
+        seq_in -->|main| resolvetaxonomy
+        tax_in -->|main| resolvetaxonomy
+        resolvetaxonomy -->|main| checkname
+    end
+
+    subgraph align [Alignment]
+        emboss[EMBOSS_SEQRET]
+        checkaligned[CHECKALIGNED]
+        hmm_in[ ]
+        hmmalign[HMMALIGN]
+        emboss -->|main| checkaligned
+        hmm_in -->|unaligned| hmmalign
+        checkaligned -->|unaligned| hmmalign
+    end
+
+    subgraph filter [Filtering]
+        gapfilter[GAPFILTER]
+        raxtax[RAXTAX_PREFILTER]
+        mislabels_raxtax_out[ ]
+        gapfilter -->|main| raxtax
+        raxtax -->|raxtax_flagged| mislabels_raxtax_out
+    end
+
+    subgraph reftree [Reference tree]
+        taxonomytree[TAXONOMYTREE]
+        iqtree[IQTREE]
+        taxonomytree -->|main| iqtree
+    end
+
+    subgraph loo [Leave-one-out placement]
+        loosplit[SATIVALOOSPLIT]
+        epang[EPANG_PLACE]
+        loosplit -->|main| epang
+    end
+
+    subgraph scoring [Scoring]
+        sativascore[SATIVASCORE]
+        mislabels_out[ ]
+        sativascore -->|main| mislabels_out
+    end
+
+    subgraph report [Reporting]
+        multiqc[MULTIQC]
+        report_out[ ]
+        multiqc -->|main| report_out
+    end
+
+    checkname -->|main| emboss
+    checkaligned -->|main| gapfilter
+    hmmalign -->|unaligned| gapfilter
+    raxtax -->|main| taxonomytree
+    iqtree -->|main| loosplit
+    epang -->|main| sativascore
+    sativascore -->|main| multiqc
