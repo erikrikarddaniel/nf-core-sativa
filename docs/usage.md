@@ -6,58 +6,58 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+nf-core/sativa identifies taxonomically mislabelled sequences by evolutionary placement: it builds a phylogeny from the declared taxonomy, places each sequence back into it after removing it (leave-one-out), and flags sequences whose phylogenetic signal doesn't agree with their declared taxonomy.
+It takes two logical inputs: a set of sequences (`--sequences`) and their proposed taxonomy (`--taxonomy`, or embedded in the sequences themselves -- see below).
 
-## Samplesheet input
+## Sequences and taxonomy input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+### Sequences (`--sequences`)
+
+Path to a sequences file, aligned or not: phylip (`.phy`), Clustal (`.aln`), or FASTA (`.fa`, `.fasta`, `.mfa`, `.alnfaa`, `.alnfna`).
+Aligned vs. unaligned is detected automatically -- no separate mode-switch parameter needed.
+Unaligned content is aligned via [hmmalign](http://hmmer.org) against an HMM profile before continuing through the rest of the pipeline as if it had arrived pre-aligned: pass `--hmm` (path to an HMM profile database) and, if that database holds more than one named profile, `--hmm_name` to pick which one.
 
 ```bash
---input '[path to samplesheet file]'
+--sequences sequences.fasta
 ```
 
-### Multiple runs of the same sample
+### Taxonomy (`--taxonomy`)
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+Optional -- see [Taxonomy embedded in sequence headers](#taxonomy-embedded-in-sequence-headers) below if omitted.
+A tab-separated file with two columns and no header: sequence name, and a semicolon-separated taxonomy string.
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+```tsv title="taxonomy.tsv"
+UnpCCeti        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium ceti
+UnpSomer        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium somerae
+UpbRectu        Bacteria;Firmicutes;Clostridia;Clostridiales;Clostridiaceae;Clostridium;Clostridium rectum
 ```
 
-### Full samplesheet
+Sequence names in the taxonomy file must match those in `--sequences` (after the sanitisation described below).
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+### Taxonomy embedded in sequence headers
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+If `--taxonomy` is omitted, taxonomy is instead derived from each `--sequences` FASTA record's own header, following [GTDB](https://gtdb.ecogenomic.org/)'s own single-file convention: the taxonomy string directly after the sequence id, space-separated.
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+```
+>UnpCCeti Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium ceti
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+This is only possible for FASTA input -- phylip and Clustal records have no room for embedded text, so those formats always require a separate `--taxonomy` file.
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+If both `--taxonomy` and embedded header text are present, the file always wins: a warning is logged (rather than the header text being silently ignored) so a mismatch between the two doesn't go unnoticed.
+
+Whichever source is used, sequence headers are stripped down to a bare id before continuing through the rest of the pipeline -- leftover header text risks being mistaken for part of the sequence name by downstream tools.
+
+### Sequence name sanitisation
+
+Sequence name characters other than letters, digits, `_`, `.`, `-`, `|` and `/` are rewritten to underscores in both `--sequences` and `--taxonomy`, since IQTREE's own tree-writer would otherwise silently mangle them in leaf names, desyncing the alignment/taxonomy from the tree it builds.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/sativa --input ./samplesheet.csv --outdir ./results  -profile docker
+nextflow run nf-core/sativa --sequences ./sequences.fasta --taxonomy ./taxonomy.tsv --outdir ./results -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -87,7 +87,8 @@ nextflow run nf-core/sativa -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
+sequences: './sequences.fasta'
+taxonomy: './taxonomy.tsv'
 outdir: './results/'
 <...>
 ```
