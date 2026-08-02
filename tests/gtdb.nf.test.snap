@@ -22,6 +22,9 @@
                 "IQTREE": {
                     "iqtree": "2.4.0"
                 },
+                "RESOLVETAXONOMY": {
+                    "python": "3.12.12"
+                },
                 "SATIVALOOSPLIT": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -37,7 +40,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T21:51:14.924513721",
+        "timestamp": "2026-08-02T08:33:42.853852069",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -75,6 +78,9 @@
                 "RAXTAXFORMAT": {
                     "python": "3.12.12"
                 },
+                "RESOLVETAXONOMY": {
+                    "python": "3.12.12"
+                },
                 "SATIVALOOSPLIT": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -90,7 +96,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T21:58:47.908588284",
+        "timestamp": "2026-08-02T08:35:31.367699209",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -128,6 +134,9 @@
                 "RAXTAXFORMAT": {
                     "python": "3.12.12"
                 },
+                "RESOLVETAXONOMY": {
+                    "python": "3.12.12"
+                },
                 "SATIVALOOSPLIT": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -143,7 +152,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T22:00:40.034496905",
+        "timestamp": "2026-08-02T08:37:21.353144706",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

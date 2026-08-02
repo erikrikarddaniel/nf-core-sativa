@@ -31,7 +31,7 @@ workflow NFCORE_SATIVA {
 
     take:
     taxonomy  // channel: taxonomy file
-    alignment // channel: alignment file
+    sequences // channel: sequences file, aligned or not
 
     main:
 
@@ -40,7 +40,7 @@ workflow NFCORE_SATIVA {
     //
     SATIVA (
         taxonomy,
-        alignment,
+        sequences,
         params.skip_raxtax,
         params.skip_gapfilter,
         params.hmm,
@@ -72,7 +72,7 @@ workflow {
         args,
         params.outdir,
         params.taxonomy,
-        params.alignment,
+        params.sequences,
         params.help,
         params.help_full,
         params.show_hidden
@@ -83,7 +83,7 @@ workflow {
     //
     NFCORE_SATIVA (
         PIPELINE_INITIALISATION.out.taxonomy,
-        PIPELINE_INITIALISATION.out.alignment
+        PIPELINE_INITIALISATION.out.sequences
     )
 
     //

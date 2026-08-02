@@ -1,0 +1,155 @@
+nextflow_process {
+
+    name "Test Process RESOLVETAXONOMY"
+    script "../main.nf"
+    process "RESOLVETAXONOMY"
+
+    tag "modules"
+    tag "modules_local"
+    tag "sativa"
+    tag "sativa/resolvetaxonomy"
+
+    test("sativa - embedded taxonomy, no external file") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'resolvetaxonomy_test' ],
+                    [],
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/resolvetaxonomy_test_embedded.fasta', checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def taxonomy = path(process.out.taxonomy[0][1]).text
+            def sequences = path(process.out.sequences[0][1]).text
+
+            assertAll(
+                // Taxonomy derived from each record's embedded header text.
+                { assert taxonomy.contains('SeqA\tBacteria;PhylumA;ClassA;OrderA;FamilyA;GenusA;SpeciesA') },
+                { assert taxonomy.contains('SeqB\tBacteria;PhylumA;ClassB;OrderB;FamilyB;GenusB;SpeciesB') },
+                // Headers stripped down to a bare id -- no leftover taxonomy text that
+                // could later be mistaken for part of the sequence name downstream.
+                { assert sequences.contains('>SeqA\n') },
+                { assert sequences.contains('>SeqB\n') },
+                { assert !sequences.contains('Bacteria') },
+                { assert process.out.versions }
+            )
+        }
+
+    }
+
+    test("sativa - external taxonomy file wins, warns on ignored embedded text") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'resolvetaxonomy_test' ],
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/resolvetaxonomy_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/resolvetaxonomy_test_embedded.fasta', checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def taxonomy = path(process.out.taxonomy[0][1]).text
+            def sequences = path(process.out.sequences[0][1]).text
+
+            assertAll(
+                // The explicit file's (distinguishable) content wins...
+                { assert taxonomy.contains('SeqA\tArchaea;OverridePhylum;OverrideClass') },
+                { assert taxonomy.contains('SeqB\tArchaea;OverridePhylum;OverrideClass2') },
+                // ...not the Bacteria;... lineage embedded in the FASTA headers.
+                { assert !taxonomy.contains('Bacteria') },
+                { assert sequences.contains('>SeqA\n') },
+                { assert !sequences.contains('Bacteria') },
+                // Ignored, not silently used -- a warning is reported.
+                { assert path(process.out.warnings[0][1]).text.toLowerCase().contains('ignoring') },
+            )
+        }
+
+    }
+
+    test("sativa - external taxonomy file, no embedded text, no warning") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'resolvetaxonomy_test' ],
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.fasta', checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def taxonomy = path(process.out.taxonomy[0][1]).text
+
+            assertAll(
+                { assert taxonomy.contains('SeqGood1\tBacteria;PhylumA;ClassA') },
+                { assert path(process.out.warnings[0][1]).text.trim().isEmpty() },
+            )
+        }
+
+    }
+
+    test("sativa - neither taxonomy file nor embedded text fails clearly") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'resolvetaxonomy_test' ],
+                    [],
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.fasta', checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert !process.success
+            assert (process.stdout + process.stderr).join('\n').contains('--taxonomy')
+        }
+
+    }
+
+    test("sativa - embedded taxonomy - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'resolvetaxonomy_test' ],
+                    [],
+                    file(params.pipelines_testdata_base_path + '/sativa/testdata/resolvetaxonomy_test_embedded.fasta', checkIfExists: true),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+}

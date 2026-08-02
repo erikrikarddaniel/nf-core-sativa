@@ -27,12 +27,12 @@ include { GUNZIP            } from '../../../modules/nf-core/gunzip/main'
 workflow ENSURE_ALIGNED {
 
     take:
-    ch_alignment // channel: alignment file, already FASTA (format-normalised by the caller)
+    ch_sequences // channel: sequences file, aligned or not, already FASTA (format-normalised by the caller)
     hmm          // value:   path to an HMM profile database, or null/empty if not needed
     hmm_name     // value:   name of a specific profile within hmm, or null/empty
 
     main:
-    CHECKALIGNED(ch_alignment.map { [ [ id: 'user-alignment' ], it ] })
+    CHECKALIGNED(ch_sequences.map { [ [ id: 'user-alignment' ], it ] })
 
     // Fail clearly, but only if there's actually something unaligned to align --
     // aligned-input users should never be forced to supply --hmm. Deferred into this

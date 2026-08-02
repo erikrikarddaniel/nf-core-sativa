@@ -8,6 +8,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sativa_pipeline'
+include { RESOLVETAXONOMY        } from '../modules/local/resolvetaxonomy/main'
 include { CHECKNAMECONSISTENCY   } from '../modules/local/checknameconsistency/main'
 include { EMBOSS_SEQRET          } from '../modules/nf-core/emboss/seqret/main'
 include { ENSURE_ALIGNED         } from '../subworkflows/local/ensure_aligned'
@@ -24,8 +25,8 @@ include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 workflow SATIVA {
 
     take:
-    ch_taxonomy    // channel: taxonomy file
-    ch_alignment   // channel: alignment file
+    ch_taxonomy    // channel: taxonomy file, or [] if not provided (derived from --sequences headers instead)
+    ch_sequences   // channel: sequences file, aligned or not
     skip_raxtax    // value:   skip the raxtax prefilter?
     skip_gapfilter // value:   skip the gap filter?
     hmm            // value:   path to an HMM profile database, or null/empty if not needed
@@ -70,35 +71,62 @@ workflow SATIVA {
         )
 
     //
-    // MODULE: Validate that taxonomy and alignment name the same sequences, and
+    // MODULE: RESOLVETAXONOMY
+    //
+    // Resolve taxonomy from an explicit --taxonomy file if given; otherwise derive it
+    // from --sequences record headers instead (GTDB-style: >id taxonomy;string), no
+    // separate mode-switch param needed. Headers are always stripped down to a bare
+    // id either way. If both a file and embedded header text are present, the file
+    // wins -- warned about, not silently ignored.
+    //
+    RESOLVETAXONOMY(
+        // '' (no taxonomy given, see PIPELINE_INITIALISATION) becomes [] here, right
+        // at the input tuple RESOLVETAXONOMY itself receives -- the literal empty
+        // list Nextflow recognises as "optional path input, absent" when it's one
+        // element of a freshly-built tuple, as opposed to a channel item in its own
+        // right (which .combine() would silently flatten away).
+        ch_taxonomy.combine(ch_sequences).map { tax, seq -> [ [ id: 'user-alignment' ], tax ?: [], seq ] }
+    )
+    RESOLVETAXONOMY.out.warnings.subscribe { _meta, warnings_file ->
+        def text = warnings_file.text.trim()
+        if (text) {
+            log.warn(text)
+        }
+    }
+    def ch_taxonomy_resolved  = RESOLVETAXONOMY.out.taxonomy.map  { _meta, tax -> tax }
+    def ch_sequences_resolved = RESOLVETAXONOMY.out.sequences.map { _meta, seq -> seq }
+
+    //
+    // MODULE: Validate that taxonomy and sequences name the same records, and
     // rewrite characters that are difficult for downstream tools (e.g. parens) in
     // both. Runs first, as a process (not inline Nextflow code) so a large input
     // doesn't inflate the head job's memory/CPU footprint.
     //
     CHECKNAMECONSISTENCY(
-        ch_taxonomy.combine(ch_alignment).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
+        ch_taxonomy_resolved.combine(ch_sequences_resolved).map { tax, seq -> [ [ id: 'user-alignment' ], tax, seq ] }
     )
-    def ch_taxonomy_checked  = CHECKNAMECONSISTENCY.out.checked.map { _meta, tax, _aln -> tax }
-    def ch_alignment_checked = CHECKNAMECONSISTENCY.out.checked.map { _meta, _tax, aln -> aln }
+    def ch_taxonomy_checked  = CHECKNAMECONSISTENCY.out.checked.map { _meta, tax, _seq -> tax }
+    def ch_sequences_checked = CHECKNAMECONSISTENCY.out.checked.map { _meta, _tax, seq -> seq }
 
     //
-    // MODULE: Normalise the alignment to FASTA once, here, rather than separately
+    // MODULE: Normalise the sequences to FASTA once, here, rather than separately
     // inside RAXTAX_PREFILTER and SWF_SATIVA (previously duplicated). Also gives
     // ENSURE_ALIGNED a single canonical format to inspect for the unaligned-input
     // support below.
     //
-    EMBOSS_SEQRET(ch_alignment_checked.map { [ [ id: 'user-alignment' ], it ] }, 'fasta')
-    def ch_alignment_fasta = EMBOSS_SEQRET.out.outseq.map { _meta, aln -> aln }
+    EMBOSS_SEQRET(ch_sequences_checked.map { [ [ id: 'user-alignment' ], it ] }, 'fasta')
+    def ch_sequences_fasta = EMBOSS_SEQRET.out.outseq.map { _meta, seq -> seq }
 
     //
     // SUBWORKFLOW: ENSURE_ALIGNED
     //
     // Transparently accepts unaligned input too, with no separate mode-switch param:
     // already-aligned content passes straight through; unaligned content is aligned
-    // via hmmalign against the hmm/hmm_name profile before continuing.
+    // via hmmalign against the hmm/hmm_name profile before continuing. Only past this
+    // point is the data actually guaranteed to be an alignment.
     //
-    ENSURE_ALIGNED(ch_alignment_fasta, hmm, hmm_name)
-    def ch_alignment_aligned = ENSURE_ALIGNED.out.alignment
+    ENSURE_ALIGNED(ch_sequences_fasta, hmm, hmm_name)
+    def ch_alignment = ENSURE_ALIGNED.out.alignment
 
     //
     // MODULE: GAPFILTER (optional, skip_gapfilter to disable)
@@ -115,13 +143,13 @@ workflow SATIVA {
     def run_gapfilter = !skip_gapfilter.toString().toBoolean()
     if (run_gapfilter) {
         GAPFILTER(
-            ch_taxonomy_checked.combine(ch_alignment_aligned).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
+            ch_taxonomy_checked.combine(ch_alignment).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
         )
         ch_taxonomy_for_raxtax  = GAPFILTER.out.taxonomy.map { _meta, tax -> tax }
         ch_alignment_for_raxtax = GAPFILTER.out.alignment.map { _meta, aln -> aln }
     } else {
         ch_taxonomy_for_raxtax  = ch_taxonomy_checked
-        ch_alignment_for_raxtax = ch_alignment_aligned
+        ch_alignment_for_raxtax = ch_alignment
     }
 
     //

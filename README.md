@@ -22,7 +22,7 @@
 ## Introduction
 
 **nf-core/sativa** is a re-implementation of the Sativa pipeline by Kozlov et al. [2016] that identifies taxonomically mislabelled sequences.
-It takes as input an alignment file and a file describing the proposed taxonomy of each sequence in the alignment.
+It takes as input a sequences file (aligned or unaligned) and a file describing the proposed taxonomy of each sequence.
 Using evolutionary placement, it identifies sequences in the alignment that do not have a phylogenetic signal that corresponds to their taxonomies.
 
 > [!NOTE]
@@ -34,21 +34,22 @@ Using evolutionary placement, it identifies sequences in the alignment that do n
   <img alt="nf-core/sativa workflow metro map" src="docs/images/nf-core-sativa_metro_map_light.svg">
 </picture>
 
-1. Check that names in the two files are consistent and do not contain problematic characters
-2. If the alignment is unaligned, align it via [hmmalign](http://hmmer.org) against an HMM profile (`--hmm`, `--hmm_name`); already-aligned input passes straight through, detected automatically -- no separate mode-switch parameter needed
-3. Filter out sequences with too high a proportion of alignment gaps to place reliably, reporting them separately rather than silently dropping them (disable with `--skip_gapfilter`; tune the threshold with `--min_nongap`)
-4. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
-5. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
-6. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
-7. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
-8. Summarise the run ([MULTIQC](https://multiqc.info/))
+1. Resolve taxonomy: from `--taxonomy` if given, otherwise derived from `--sequences` record headers instead (GTDB-style: `>id taxonomy;string`); if both are present, the file wins, with a warning rather than silently ignoring the header text
+2. Check that names in the two are consistent and do not contain problematic characters
+3. If the sequences are unaligned, align them via [hmmalign](http://hmmer.org) against an HMM profile (`--hmm`, `--hmm_name`); already-aligned input passes straight through, detected automatically -- no separate mode-switch parameter needed
+4. Filter out sequences with too high a proportion of alignment gaps to place reliably, reporting them separately rather than silently dropping them (disable with `--skip_gapfilter`; tune the threshold with `--min_nongap`)
+5. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
+6. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
+7. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
+8. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
+9. Summarise the run ([MULTIQC](https://multiqc.info/))
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-First, prepare an alignment file and a taxonomy file:
+First, prepare a sequences file and a taxonomy file:
 
 ```
       5     50
@@ -59,9 +60,9 @@ UxjAloci   ?????????? ?????????? ?????????? ?????????? ?????????U
 UyvCanif   ?????????? ?????????? ?????????? ?????????? ?????????C
 ```
 
-The alignment can be `phylip`, `clustal` or `fasta` formatted, aligned or not.
+The sequences file can be `phylip`, `clustal` or `fasta` formatted, aligned or not.
 Unaligned input is aligned automatically via `hmmalign`; pass `--hmm` (and `--hmm_name`, if that profile database holds more than one profile) to say which HMM profile to align against.
-The taxonomy file should contain the same sequence names as the alignment, be tab-separated without a header:
+The taxonomy file should contain the same sequence names as the sequences file, be tab-separated without a header:
 
 ```tsv
 UnpCCeti        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium ceti
@@ -70,6 +71,15 @@ UpbRectu        Bacteria;Firmicutes;Clostridia;Clostridiales;Clostridiaceae;Clos
 UxjAloci        Bacteria;Firmicutes;Clostridia;Clostridiales;Peptostreptococcaceae;Filifactor;Filifactor alocis
 UyvCanif        Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Fusobacterium;Fusobacterium canifelinum
 ```
+
+`--taxonomy` is optional: if it's omitted, each `--sequences` FASTA record's header must instead carry the taxonomy directly after its id, GTDB's own single-file convention:
+
+```
+>UnpCCeti Bacteria;Fusobacteria;Fusobacteriia;Fusobacteriales;Fusobacteriaceae;Cetobacterium;Cetobacterium ceti
+```
+
+(Only possible for FASTA input, since `phylip`/`clustal` records have no room for it.)
+If both `--taxonomy` and embedded header text are present, the file wins, and a warning is logged rather than the header text being silently ignored.
 
 (Sequence name characters other than letters, digits, `_`, `.`, `-`, `|` and `/` will be replaced by underscores.)
 
@@ -80,7 +90,7 @@ Now, you can run the pipeline using:
 ```bash
 nextflow run nf-core/sativa \
    -profile <docker/singularity/.../institute> \
-   --alignment alignment.phy \
+   --sequences sequences.phy \
    --taxonomy taxonomy.tsv \
    --outdir <OUTDIR>
 ```

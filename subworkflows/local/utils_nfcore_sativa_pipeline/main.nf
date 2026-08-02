@@ -32,7 +32,7 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     taxonomy          //  string: Path to taxonomy file
-    alignment         //  string: Path to alignment file
+    sequences         //  string: Path to sequences file, aligned or not
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
@@ -78,7 +78,7 @@ workflow PIPELINE_INITIALISATION {
         before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
     }
 
-    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --taxonomy taxonomy.tsv --alignment alignment.alnfna --outdir <OUTDIR>"
+    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --taxonomy taxonomy.tsv --sequences sequences.alnfna --outdir <OUTDIR>"
 
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
@@ -100,12 +100,21 @@ workflow PIPELINE_INITIALISATION {
         nextflow_cli_args
     )
 
-    ch_taxonomy  = channel.fromPath(taxonomy)
-    ch_alignment = channel.fromPath(alignment)
+    // taxonomy is optional -- RESOLVETAXONOMY derives it from --sequences headers if
+    // not given (see workflows/sativa.nf). Emit '' (empty string), not [], when
+    // absent: [] is Nextflow's canonical "no file" sentinel for an optional path
+    // *process* input, but a channel that emits a bare [] gets its list silently
+    // spread/flattened away by .combine() (confirmed empirically -- it drops the
+    // slot entirely rather than pairing it up), desyncing a downstream .map{}
+    // closure's argument count. '' survives .combine() safely as an opaque scalar;
+    // workflows/sativa.nf converts it to the real [] right at RESOLVETAXONOMY's own
+    // input-tuple construction instead.
+    ch_taxonomy  = taxonomy ? channel.fromPath(taxonomy) : channel.value('')
+    ch_sequences = channel.fromPath(sequences)
 
     emit:
     taxonomy  = ch_taxonomy
-    alignment = ch_alignment
+    sequences = ch_sequences
     versions  = ch_versions
 }
 

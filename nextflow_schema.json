@@ -17,24 +17,25 @@
                     "format": "file-path",
                     "exists": true,
                     "pattern": "^\\S+\\.(tax)|(tsv)",
-                    "description": "Path to a taxonomy file.",
-                    "help_text": "TSV file with two columns: Name and semicolon-separated taxonomy.",
+                    "description": "Path to a taxonomy file. If omitted, taxonomy is derived from --sequences record headers instead.",
+                    "help_text": "TSV file with two columns: Name and semicolon-separated taxonomy. If not given, each --sequences FASTA record's header must carry the taxonomy directly after its id (GTDB-style: `>id taxonomy;string`). If both are given, the file wins -- a warning is logged if header text is also present and being ignored.",
                     "fa_icon": "fas fa-file-alt"
                 },
-                "alignment": {
+                "sequences": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
                     "pattern": "^\\S+\\.(aln)|(phy)|(alnf[na]a)|(mfa)|(fa)|(fasta)$",
-                    "description": "Path to an alignment file in phylip (.phy), Clustal (.aln) or fasta format (.fa, .fasta, .mfa, .alnfaa or .alnfna).",
+                    "description": "Path to a sequences file, aligned or not, in phylip (.phy), Clustal (.aln) or fasta format (.fa, .fasta, .mfa, .alnfaa or .alnfna).",
+                    "help_text": "Unaligned content is aligned automatically via hmmalign -- see --hmm/--hmm_name.",
                     "fa_icon": "fas fa-file-alt"
                 },
                 "hmm": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "description": "Path to an HMM profile database, used to align --alignment via hmmalign if it turns out to be unaligned. Only required when the input is unaligned.",
-                    "help_text": "Not needed at all if --alignment is already a multiple sequence alignment (detected automatically). If the database holds more than one named profile, also set --hmm_name.",
+                    "description": "Path to an HMM profile database, used to align --sequences via hmmalign if it turns out to be unaligned. Only required when the input is unaligned.",
+                    "help_text": "Not needed at all if --sequences is already a multiple sequence alignment (detected automatically). If the database holds more than one named profile, also set --hmm_name.",
                     "fa_icon": "fas fa-dna"
                 },
                 "hmm_name": {

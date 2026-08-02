@@ -1,0 +1,41 @@
+nextflow_pipeline {
+
+    name "Test pipeline with real GTDB data, taxonomy embedded in FASTA headers"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_gtdb_embedded"
+
+    test("-profile test_gtdb_embedded, raxtax disabled") {
+
+        when {
+            params {
+                outdir      = "$outputDir"
+                skip_raxtax = true
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def mislabels = path("$outputDir/mislabels/user-alignment.mislabels.tsv").text
+            def summary   = path("$outputDir/sativascore/user-alignment.summary.txt").text
+
+            assertAll(
+                // No --taxonomy given: RESOLVETAXONOMY derived it from the combined
+                // fixture's own GTDB-style headers instead.
+                { assert new File("$outputDir/resolvetaxonomy").exists() },
+                // Same 121 real sequences minus the 16 that fall below GAPFILTER's
+                // default min_nongap threshold (0.3), as with the two-file test_gtdb
+                // profile -- confirms the derived taxonomy carries the same content.
+                { assert summary.contains('sequences scored: 105') },
+                // Same DupHaloA/DupSulfoA positive control as test_gtdb, caught via
+                // the taxonomy derived from headers rather than a separate file.
+                { assert mislabels.contains('DupHaloA') },
+                { assert mislabels.contains('DupSulfoA') },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions") },
+            )
+        }
+
+    }
+
+}

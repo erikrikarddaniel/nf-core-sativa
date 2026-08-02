@@ -19,6 +19,9 @@
                 "IQTREE": {
                     "iqtree": "2.4.0"
                 },
+                "RESOLVETAXONOMY": {
+                    "python": "3.12.12"
+                },
                 "SATIVALOOSPLIT": {
                     "python": "3.12.12",
                     "biopython": 1.84
@@ -140,6 +143,10 @@
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_sativa_software_mqc_versions.yml",
+                "resolvetaxonomy",
+                "resolvetaxonomy/user-alignment.resolved.phy",
+                "resolvetaxonomy/user-alignment.resolved.tax",
+                "resolvetaxonomy/user-alignment.warnings.txt",
                 "sativaloosplit",
                 "sativaloosplit/queryaln",
                 "sativaloosplit/queryaln/0001_UnpCCeti.query.fasta",
@@ -276,10 +283,13 @@
                 "user-alignment.checked.tax:md5,f634269ab9aea1616bf9b76758f6cd44",
                 "user-alignment.fasta:md5,452d9754506eefcb9ed4891fc569f93a",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
+                "user-alignment.resolved.phy:md5,18b06732288ac020f53b609fc597db21",
+                "user-alignment.resolved.tax:md5,f634269ab9aea1616bf9b76758f6cd44",
+                "user-alignment.warnings.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "guide-tree.guide.nwk:md5,d02bbee02826f3322e3833fc86702e44"
             ]
         ],
-        "timestamp": "2026-08-01T20:40:59.772563454",
+        "timestamp": "2026-08-02T08:49:09.836201586",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
