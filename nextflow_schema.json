@@ -56,14 +56,26 @@
                 },
                 "skip_gapfilter": {
                     "type": "boolean",
-                    "description": "Skip filtering out sequences with too high a proportion of alignment gaps, and run every sequence straight through the rest of the pipeline.",
+                    "description": "For already-aligned input: skip filtering out sequences with too high a proportion of alignment gaps, and run every sequence straight through the rest of the pipeline.",
                     "fa_icon": "fas fa-forward"
                 },
                 "min_nongap": {
                     "type": "number",
                     "default": 0.3,
-                    "description": "Minimum proportion of non-gap columns a sequence must have in the (possibly hmmalign-realigned) alignment to be kept. Sequences below this are too short/incomplete to place reliably, and are reported separately instead of being placed.",
-                    "help_text": "A taxonomically broad reference alignment is naturally wide, with many columns that are only real sequence for a handful of divergent taxa -- a low default keeps that from penalising genuinely full-length sequences. Raise it for a narrower (e.g. single-genus) alignment where a stricter threshold makes sense.",
+                    "description": "For already-aligned input: minimum proportion of non-gap columns a sequence must have in the alignment to be kept. Sequences below this are too short/incomplete to place reliably, and are reported separately instead of being placed.",
+                    "help_text": "A taxonomically broad reference alignment is naturally wide, with many columns that are only real sequence for a handful of divergent taxa -- a low default keeps that from penalising genuinely full-length sequences. Raise it for a narrower (e.g. single-genus) alignment where a stricter threshold makes sense. Only applies to input that was already aligned on entry -- see --min_profile_cover for hmmalign-derived input.",
+                    "fa_icon": "fas fa-ruler"
+                },
+                "skip_profile_cover": {
+                    "type": "boolean",
+                    "description": "For hmmalign-derived input: skip filtering out sequences that cover too little of the HMM profile, and run every sequence straight through the rest of the pipeline.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "min_profile_cover": {
+                    "type": "number",
+                    "default": 0.8,
+                    "description": "For hmmalign-derived input: minimum proportion of the HMM profile's match-state columns a sequence must cover to be kept. Sequences below this are too short/incomplete to place reliably, and are reported separately instead of being placed.",
+                    "help_text": "Unlike an already-aligned reference set, a masked hmmalign-derived alignment's width is fixed by the HMM profile itself, so real full-length sequences cluster tightly near full coverage -- a higher default than --min_nongap correctly separates them from genuinely partial sequences instead of barely filtering anything.",
                     "fa_icon": "fas fa-ruler"
                 },
                 "outdir": {

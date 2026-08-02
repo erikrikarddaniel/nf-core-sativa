@@ -24,12 +24,14 @@ nextflow_workflow {
         then {
             assert workflow.success
 
-            def aligned = path(workflow.out.alignment[0]).text
+            def aligned = path(workflow.out.alignment_passthrough[0]).text
 
             assertAll(
                 // Content preserved exactly -- no HMM step should have run at all.
                 { assert aligned.contains('>SeqA') },
                 { assert aligned.contains('ACGTACGTAC') },
+                // Nothing went through the hmmalign branch.
+                { assert workflow.out.alignment_from_hmm.isEmpty() },
             )
         }
 
@@ -50,7 +52,7 @@ nextflow_workflow {
         then {
             assert workflow.success
 
-            def content = path(workflow.out.alignment[0]).text
+            def content = path(workflow.out.alignment_from_hmm[0]).text
             def seqLengths = content.split('>').findAll { it.trim() }.collect { entry ->
                 entry.readLines().drop(1).join('').trim().length()
             }
@@ -62,6 +64,18 @@ nextflow_workflow {
                 // All three input sequences (originally 16/10/20bp) now share one
                 // column count -- the whole point of running them through hmmalign.
                 { assert seqLengths.toSet().size() == 1 },
+                // ...and that column count is exactly the HMM's own match-state
+                // count (Barrnap's 16S_rRNA profile: 1477), confirmed via
+                // `hmmalign --trim | esl-alimask --rf-is-mask` against this same
+                // profile. Not the wider width hmmalign's raw Stockholm output
+                // would have: HMMER_ESLALIMASK masks out insert-state columns
+                // (each real only for one or two sequences, padding everyone else
+                // with extra gaps there) *before* this, so a later non-gap-
+                // proportion filter measures true profile coverage rather than
+                // being diluted by insert-column noise.
+                { assert seqLengths[0] == 1477 },
+                // Nothing went through the passthrough branch.
+                { assert workflow.out.alignment_passthrough.isEmpty() },
             )
         }
 

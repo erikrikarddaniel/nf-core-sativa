@@ -15,6 +15,7 @@ components:
   - checkaligned
   - hmmer/hmmfetch
   - hmmer/hmmalign
+  - hmmer/eslalimask
   - hmmer/eslreformat
   - gunzip
 input:
@@ -35,10 +36,19 @@ input:
         Name of a specific profile to extract from hmm, if that database holds more
         than one. Null/empty otherwise.
 output:
-  - alignment:
+  - alignment_passthrough:
       type: file
       description: |
-        The input, aligned either way (passed through unchanged if it already was)
+        The input, when it was already aligned on entry (passed through unchanged).
+        Empty channel when the input was unaligned instead.
+        Structure: path(alignment.fasta)
+      pattern: "*.fasta"
+  - alignment_from_hmm:
+      type: file
+      description: |
+        The input, when it was unaligned on entry: aligned via hmmalign then masked
+        down to the HMM's match-state columns only. Empty channel when the input
+        was already aligned instead.
         Structure: path(alignment.fasta)
       pattern: "*.fasta"
   - versions:

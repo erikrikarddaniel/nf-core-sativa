@@ -37,4 +37,34 @@ nextflow_pipeline {
 
     }
 
+    test("-profile test_gtdb_unaligned, raxtax disabled") {
+
+        when {
+            params {
+                outdir      = "$outputDir"
+                skip_raxtax = true
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def summary = path("$outputDir/sativascore/user-alignment.summary.txt").text
+
+            assertAll(
+                // Regression guard for the GAPFILTER-vs-hmmalign bug (HMMER_ESLALIMASK
+                // masks the hmmalign output down to the HMM's match-state columns before
+                // PROFILECOVER sees it -- see ensure_aligned's own test for the column-count
+                // assertion). Without that fix, insert-state-column padding deflated the
+                // non-gap-proportion metric badly enough to lose nearly everything even at
+                // low thresholds. Once measured against match-state columns only, real
+                // coverage splits cleanly bimodal (partial sequences cluster below ~0.80,
+                // essentially complete ones above ~0.90) -- 121 real sequences minus the 25
+                // that genuinely fall below the default min_profile_cover (0.8).
+                { assert summary.contains('sequences scored: 96') },
+            )
+        }
+
+    }
+
 }

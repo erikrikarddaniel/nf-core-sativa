@@ -13,6 +13,7 @@ include { CHECKNAMECONSISTENCY   } from '../modules/local/checknameconsistency/m
 include { EMBOSS_SEQRET          } from '../modules/nf-core/emboss/seqret/main'
 include { ENSURE_ALIGNED         } from '../subworkflows/local/ensure_aligned'
 include { GAPFILTER              } from '../modules/local/gapfilter/main'
+include { PROFILECOVER           } from '../modules/local/profilecover/main'
 include { RAXTAX_PREFILTER       } from '../subworkflows/local/raxtax_prefilter'
 include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 
@@ -25,12 +26,13 @@ include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 workflow SATIVA {
 
     take:
-    ch_taxonomy    // channel: taxonomy file, or [] if not provided (derived from --sequences headers instead)
-    ch_sequences   // channel: sequences file, aligned or not
-    skip_raxtax    // value:   skip the raxtax prefilter?
-    skip_gapfilter // value:   skip the gap filter?
-    hmm            // value:   path to an HMM profile database, or null/empty if not needed
-    hmm_name       // value:   name of a specific profile within hmm, or null/empty
+    ch_taxonomy        // channel: taxonomy file, or [] if not provided (derived from --sequences headers instead)
+    ch_sequences       // channel: sequences file, aligned or not
+    skip_raxtax        // value:   skip the raxtax prefilter?
+    skip_gapfilter     // value:   skip the gap filter (already-aligned input)?
+    skip_profile_cover // value:   skip the profile-coverage filter (hmmalign-derived input)?
+    hmm                // value:   path to an HMM profile database, or null/empty if not needed
+    hmm_name           // value:   name of a specific profile within hmm, or null/empty
     multiqc_config
     multiqc_logo
     multiqc_methods_description
@@ -126,31 +128,54 @@ workflow SATIVA {
     // point is the data actually guaranteed to be an alignment.
     //
     ENSURE_ALIGNED(ch_sequences_fasta, hmm, hmm_name)
-    def ch_alignment = ENSURE_ALIGNED.out.alignment
 
     //
-    // MODULE: GAPFILTER (optional, skip_gapfilter to disable)
+    // MODULE: GAPFILTER + PROFILECOVER (each optional, own skip flag)
     //
-    // Drops sequences too short/gappy to place reliably (below params.min_nongap
-    // non-gap proportion in the -- possibly hmmalign-realigned -- alignment),
-    // reporting them separately rather than silently discarding them.
+    // Both drop sequences too short/incomplete to place reliably, reporting them
+    // separately rather than silently discarding them -- but applied to ENSURE_ALIGNED's
+    // two branches independently, since they have structurally different non-gap
+    // distributions (see ensure_aligned/main.nf): GAPFILTER (params.min_nongap) for
+    // already-aligned input, PROFILECOVER (params.min_profile_cover) for hmmalign-
+    // derived input, already masked down to the HMM's match-state columns.
     //
-    def ch_taxonomy_for_raxtax
-    def ch_alignment_for_raxtax
+    def ch_taxonomy_gapfiltered
+    def ch_alignment_gapfiltered
     // Coerce explicitly: a CLI-supplied `--skip_gapfilter false` arrives as the
     // *string* "false" -- see the analogous skip_raxtax coercion below for why
     // .toString().toBoolean() is needed even with nf-schema's cli_typecast enabled.
     def run_gapfilter = !skip_gapfilter.toString().toBoolean()
     if (run_gapfilter) {
         GAPFILTER(
-            ch_taxonomy_checked.combine(ch_alignment).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
+            ch_taxonomy_checked.combine(ENSURE_ALIGNED.out.alignment_passthrough).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
         )
-        ch_taxonomy_for_raxtax  = GAPFILTER.out.taxonomy.map { _meta, tax -> tax }
-        ch_alignment_for_raxtax = GAPFILTER.out.alignment.map { _meta, aln -> aln }
+        ch_taxonomy_gapfiltered  = GAPFILTER.out.taxonomy.map { _meta, tax -> tax }
+        ch_alignment_gapfiltered = GAPFILTER.out.alignment.map { _meta, aln -> aln }
     } else {
-        ch_taxonomy_for_raxtax  = ch_taxonomy_checked
-        ch_alignment_for_raxtax = ch_alignment
+        ch_taxonomy_gapfiltered  = ch_taxonomy_checked
+        ch_alignment_gapfiltered = ENSURE_ALIGNED.out.alignment_passthrough
     }
+
+    def ch_taxonomy_covfiltered
+    def ch_alignment_covfiltered
+    def run_profile_cover = !skip_profile_cover.toString().toBoolean()
+    if (run_profile_cover) {
+        PROFILECOVER(
+            ch_taxonomy_checked.combine(ENSURE_ALIGNED.out.alignment_from_hmm).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
+        )
+        ch_taxonomy_covfiltered  = PROFILECOVER.out.taxonomy.map { _meta, tax -> tax }
+        ch_alignment_covfiltered = PROFILECOVER.out.alignment.map { _meta, aln -> aln }
+    } else {
+        ch_taxonomy_covfiltered  = ch_taxonomy_checked
+        ch_alignment_covfiltered = ENSURE_ALIGNED.out.alignment_from_hmm
+    }
+
+    // Exactly one of ENSURE_ALIGNED's two branches ever has content for a given run
+    // (CHECKALIGNED classifies the whole input as aligned-or-not, never a mix), so
+    // .mix() here just recombines whichever branch actually ran with the other's
+    // always-empty channel.
+    def ch_taxonomy_for_raxtax  = ch_taxonomy_gapfiltered.mix(ch_taxonomy_covfiltered)
+    def ch_alignment_for_raxtax = ch_alignment_gapfiltered.mix(ch_alignment_covfiltered)
 
     //
     // SUBWORKFLOW: RAXTAX_PREFILTER (optional, skip_raxtax to disable)
