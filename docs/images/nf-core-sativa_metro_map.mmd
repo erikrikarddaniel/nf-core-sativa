@@ -30,12 +30,15 @@
 
 %%metro off_track: mislabels_raxtax_out
 
+%%metro group: SATIVA subworkflow | taxonomytree, iqtree, loosplit, epang, sativascore | above
+
 %%metro process: resolvetaxonomy | RESOLVETAXONOMY
 %%metro process: checkname | CHECKNAMECONSISTENCY
 %%metro process: emboss | EMBOSS_SEQRET
 %%metro process: checkaligned | ENSURE_ALIGNED:CHECKALIGNED
 %%metro process: hmmalign | ENSURE_ALIGNED:(HMMER_.*|GUNZIP)
 %%metro process: gapfilter | GAPFILTER
+%%metro process: profilecover | PROFILECOVER
 %%metro process: raxtax | RAXTAX_PREFILTER:.*
 %%metro process: taxonomytree | SWF_SATIVA:TAXONOMYTREE
 %%metro process: iqtree | SWF_SATIVA:IQTREE
@@ -67,9 +70,11 @@ graph LR
 
     subgraph filter [Filtering]
         gapfilter[GAPFILTER]
+        profilecover[PROFILECOVER]
         raxtax[RAXTAX_PREFILTER]
         mislabels_raxtax_out[ ]
         gapfilter -->|main| raxtax
+        profilecover -->|unaligned| raxtax
         raxtax -->|raxtax_flagged| mislabels_raxtax_out
     end
 
@@ -99,7 +104,7 @@ graph LR
 
     checkname -->|main| emboss
     checkaligned -->|main| gapfilter
-    hmmalign -->|unaligned| gapfilter
+    hmmalign -->|unaligned| profilecover
     raxtax -->|main| taxonomytree
     iqtree -->|main| loosplit
     epang -->|main| sativascore
