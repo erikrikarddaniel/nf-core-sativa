@@ -67,4 +67,41 @@ nextflow_pipeline {
 
     }
 
+    test("-profile test_gtdb_unaligned, gapfilter skipped (inactive branch)") {
+
+        when {
+            params {
+                outdir         = "$outputDir"
+                skip_raxtax    = true
+                skip_gapfilter = true
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            def summary = path("$outputDir/sativascore/user-alignment.summary.txt").text
+
+            assertAll(
+                // Regression guard: --skip_gapfilter is set here for the branch that
+                // ISN'T active (unaligned input takes the hmm/PROFILECOVER branch;
+                // GAPFILTER would never have run regardless, since it only ever sees
+                // alignment_passthrough). Before the fix, the skipped branch's "else"
+                // fell back to the *unconditional* ch_taxonomy_checked (all 121
+                // sequences) paired with an empty alignment channel -- a cardinality
+                // mismatch that .mix() then let leak through as a second, stray
+                // taxonomy item downstream. Whichever of the resulting two
+                // TAXONOMYTREE invocations happened to finish first could pair with
+                // SWF_SATIVA's one real alignment, sometimes handing IQTREE a
+                // constraint tree built from all 121 taxa against a 96-sequence
+                // alignment -- "Taxon ... in constraint tree does not appear in full
+                // tree". Same expected outcome as the "raxtax disabled" test above
+                // (skip_gapfilter is a no-op for this branch either way) proves the
+                // stray item is gone.
+                { assert summary.contains('sequences scored: 96') },
+            )
+        }
+
+    }
+
 }

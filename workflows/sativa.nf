@@ -153,8 +153,16 @@ workflow SATIVA {
         ch_taxonomy_gapfiltered  = GAPFILTER.out.taxonomy.map { _meta, tax -> tax }
         ch_alignment_gapfiltered = GAPFILTER.out.alignment.map { _meta, aln -> aln }
     } else {
-        ch_taxonomy_gapfiltered  = ch_taxonomy_checked
+        // ch_taxonomy_checked alone would still emit its one item even when
+        // alignment_passthrough is empty (e.g. unaligned input took the hmm branch
+        // instead), desyncing this pair's cardinality -- 1 taxonomy item vs 0
+        // alignment items -- which then corrupts the .mix()/.join() below (the stray
+        // taxonomy item pairs with the *other* branch's real alignment downstream in
+        // RAXTAX_PREFILTER, leaking the full unfiltered taxonomy through paired with
+        // a filtered alignment). Gate it by the same alignment channel instead, so it
+        // collapses to 0 items exactly when alignment_passthrough does.
         ch_alignment_gapfiltered = ENSURE_ALIGNED.out.alignment_passthrough
+        ch_taxonomy_gapfiltered  = ch_taxonomy_checked.combine(ch_alignment_gapfiltered).map { tax, _aln -> tax }
     }
 
     def ch_taxonomy_covfiltered
@@ -167,8 +175,9 @@ workflow SATIVA {
         ch_taxonomy_covfiltered  = PROFILECOVER.out.taxonomy.map { _meta, tax -> tax }
         ch_alignment_covfiltered = PROFILECOVER.out.alignment.map { _meta, aln -> aln }
     } else {
-        ch_taxonomy_covfiltered  = ch_taxonomy_checked
+        // See the analogous gapfilter comment above -- same cardinality-gating fix.
         ch_alignment_covfiltered = ENSURE_ALIGNED.out.alignment_from_hmm
+        ch_taxonomy_covfiltered  = ch_taxonomy_checked.combine(ch_alignment_covfiltered).map { tax, _aln -> tax }
     }
 
     // Exactly one of ENSURE_ALIGNED's two branches ever has content for a given run
