@@ -53,6 +53,18 @@
                     "description": "Taxonomic rank at which raxtax's self-classification must agree with the declared taxonomy, counted from the most specific rank (1) upward. A sequence disagreeing at this one rank is flagged as a mislabel and skips EPA-ng placement.",
                     "fa_icon": "fas fa-layer-group"
                 },
+                "skip_gapfilter": {
+                    "type": "boolean",
+                    "description": "Skip filtering out sequences with too high a proportion of alignment gaps, and run every sequence straight through the rest of the pipeline.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "min_nongap": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "Minimum proportion of non-gap columns a sequence must have in the (possibly hmmalign-realigned) alignment to be kept. Sequences below this are too short/incomplete to place reliably, and are reported separately instead of being placed.",
+                    "help_text": "A taxonomically broad reference alignment is naturally wide, with many columns that are only real sequence for a handful of divergent taxa -- a low default keeps that from penalising genuinely full-length sequences. Raise it for a narrower (e.g. single-genus) alignment where a stricter threshold makes sense.",
+                    "fa_icon": "fas fa-ruler"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",

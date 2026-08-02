@@ -41,6 +41,10 @@ workflow NFCORE_SATIVA {
     SATIVA (
         taxonomy,
         alignment,
+        params.skip_raxtax,
+        params.skip_gapfilter,
+        params.hmm,
+        params.hmm_name,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,

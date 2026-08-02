@@ -16,6 +16,9 @@
                 "EPANG_PLACE": {
                     "epa-ng": "0.3.8"
                 },
+                "GAPFILTER": {
+                    "python": "3.12.12"
+                },
                 "IQTREE": {
                     "iqtree": "2.4.0"
                 },
@@ -34,7 +37,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T20:44:58.051094468",
+        "timestamp": "2026-08-01T21:51:14.924513721",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -57,6 +60,9 @@
                 "EPANG_PLACE": {
                     "epa-ng": "0.3.8"
                 },
+                "GAPFILTER": {
+                    "python": "3.12.12"
+                },
                 "IQTREE": {
                     "iqtree": "2.4.0"
                 },
@@ -84,7 +90,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T20:47:29.138344625",
+        "timestamp": "2026-08-01T21:58:47.908588284",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -107,6 +113,9 @@
                 "EPANG_PLACE": {
                     "epa-ng": "0.3.8"
                 },
+                "GAPFILTER": {
+                    "python": "3.12.12"
+                },
                 "IQTREE": {
                     "iqtree": "2.4.0"
                 },
@@ -134,7 +143,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T20:50:10.4027153",
+        "timestamp": "2026-08-01T22:00:40.034496905",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

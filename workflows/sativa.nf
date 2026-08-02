@@ -11,6 +11,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sati
 include { CHECKNAMECONSISTENCY   } from '../modules/local/checknameconsistency/main'
 include { EMBOSS_SEQRET          } from '../modules/nf-core/emboss/seqret/main'
 include { ENSURE_ALIGNED         } from '../subworkflows/local/ensure_aligned'
+include { GAPFILTER              } from '../modules/local/gapfilter/main'
 include { RAXTAX_PREFILTER       } from '../subworkflows/local/raxtax_prefilter'
 include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 
@@ -23,8 +24,12 @@ include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 workflow SATIVA {
 
     take:
-    ch_taxonomy  // channel: taxonomy file
-    ch_alignment // channel: alignment file
+    ch_taxonomy    // channel: taxonomy file
+    ch_alignment   // channel: alignment file
+    skip_raxtax    // value:   skip the raxtax prefilter?
+    skip_gapfilter // value:   skip the gap filter?
+    hmm            // value:   path to an HMM profile database, or null/empty if not needed
+    hmm_name       // value:   name of a specific profile within hmm, or null/empty
     multiqc_config
     multiqc_logo
     multiqc_methods_description
@@ -90,13 +95,37 @@ workflow SATIVA {
     //
     // Transparently accepts unaligned input too, with no separate mode-switch param:
     // already-aligned content passes straight through; unaligned content is aligned
-    // via hmmalign against params.hmm (see there for details) before continuing.
+    // via hmmalign against the hmm/hmm_name profile before continuing.
     //
-    ENSURE_ALIGNED(ch_alignment_fasta)
+    ENSURE_ALIGNED(ch_alignment_fasta, hmm, hmm_name)
     def ch_alignment_aligned = ENSURE_ALIGNED.out.alignment
 
     //
-    // SUBWORKFLOW: RAXTAX_PREFILTER (optional, params.skip_raxtax to disable)
+    // MODULE: GAPFILTER (optional, skip_gapfilter to disable)
+    //
+    // Drops sequences too short/gappy to place reliably (below params.min_nongap
+    // non-gap proportion in the -- possibly hmmalign-realigned -- alignment),
+    // reporting them separately rather than silently discarding them.
+    //
+    def ch_taxonomy_for_raxtax
+    def ch_alignment_for_raxtax
+    // Coerce explicitly: a CLI-supplied `--skip_gapfilter false` arrives as the
+    // *string* "false" -- see the analogous skip_raxtax coercion below for why
+    // .toString().toBoolean() is needed even with nf-schema's cli_typecast enabled.
+    def run_gapfilter = !skip_gapfilter.toString().toBoolean()
+    if (run_gapfilter) {
+        GAPFILTER(
+            ch_taxonomy_checked.combine(ch_alignment_aligned).map { tax, aln -> [ [ id: 'user-alignment' ], tax, aln ] }
+        )
+        ch_taxonomy_for_raxtax  = GAPFILTER.out.taxonomy.map { _meta, tax -> tax }
+        ch_alignment_for_raxtax = GAPFILTER.out.alignment.map { _meta, aln -> aln }
+    } else {
+        ch_taxonomy_for_raxtax  = ch_taxonomy_checked
+        ch_alignment_for_raxtax = ch_alignment_aligned
+    }
+
+    //
+    // SUBWORKFLOW: RAXTAX_PREFILTER (optional, skip_raxtax to disable)
     //
     // Fast raxtax self-classification prefilter ahead of the expensive EPA-ng-based
     // placement below. Sequences it flags never reach SWF_SATIVA -- they're reported
@@ -112,15 +141,15 @@ workflow SATIVA {
     // PIPELINE_INITIALISATION) validates the string against the boolean schema type but
     // does not itself replace params.skip_raxtax with a real Boolean, so this is still
     // needed even with cli_typecast on.
-    def skip_raxtax = params.skip_raxtax.toString().toBoolean()
-    if (!skip_raxtax) {
-        RAXTAX_PREFILTER(ch_taxonomy_checked, ch_alignment_aligned)
+    def run_raxtax = !skip_raxtax.toString().toBoolean()
+    if (run_raxtax) {
+        RAXTAX_PREFILTER(ch_taxonomy_for_raxtax, ch_alignment_for_raxtax)
         ch_taxonomy_for_sativa  = RAXTAX_PREFILTER.out.taxonomy
         ch_alignment_for_sativa = RAXTAX_PREFILTER.out.alignment
         ch_raxtax_mislabels     = RAXTAX_PREFILTER.out.mislabels
     } else {
-        ch_taxonomy_for_sativa  = ch_taxonomy_checked
-        ch_alignment_for_sativa = ch_alignment_aligned
+        ch_taxonomy_for_sativa  = ch_taxonomy_for_raxtax
+        ch_alignment_for_sativa = ch_alignment_for_raxtax
         ch_raxtax_mislabels     = channel.empty()
     }
 

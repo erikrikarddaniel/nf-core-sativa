@@ -4,9 +4,9 @@
 
     Sequences that are already a multiple sequence alignment (every record the same
     length) pass through unchanged. Sequences that aren't are aligned against an HMM
-    profile (params.hmm, optionally a specific named profile within it via
-    params.hmm_name) using hmmalign, then converted back to plain FASTA -- no separate
-    mode-switch param needed, detection is by content.
+    profile (hmm, optionally a specific named profile within it via hmm_name) using
+    hmmalign, then converted back to plain FASTA -- no separate mode-switch param
+    needed, detection is by content.
 
     Workflow:
       1. Detect aligned vs unaligned (equal sequence lengths?)     (CHECKALIGNED)
@@ -27,7 +27,9 @@ include { GUNZIP            } from '../../../modules/nf-core/gunzip/main'
 workflow ENSURE_ALIGNED {
 
     take:
-    ch_alignment  // channel: alignment file, already FASTA (format-normalised by the caller)
+    ch_alignment // channel: alignment file, already FASTA (format-normalised by the caller)
+    hmm          // value:   path to an HMM profile database, or null/empty if not needed
+    hmm_name     // value:   name of a specific profile within hmm, or null/empty
 
     main:
     CHECKALIGNED(ch_alignment.map { [ [ id: 'user-alignment' ], it ] })
@@ -38,7 +40,7 @@ workflow ENSURE_ALIGNED {
     // genuinely flows through; error() halts the pipeline with the message.
     def ch_unaligned = CHECKALIGNED.out.unaligned
         .map { meta, fasta ->
-            if (!params.hmm) {
+            if (!hmm) {
                 error("Unaligned input detected, but --hmm was not provided. Supply " +
                     "--hmm (path to an HMM profile database) to align it -- and " +
                     "--hmm_name too, if that database holds more than one profile.")
@@ -46,17 +48,16 @@ workflow ENSURE_ALIGNED {
             [ meta, fasta ]
         }
 
-    // params.hmm/params.hmm_name are plain pipeline params, known before execution
-    // starts, so it's safe to branch on them here at compose time rather than inside
-    // a channel operator.
+    // hmm/hmm_name are plain values, known before execution starts, so it's safe to
+    // branch on them here at compose time rather than inside a channel operator.
     def ch_hmm_profile
-    if (params.hmm) {
-        def ch_hmm_db = channel.fromPath(params.hmm, checkIfExists: true)
+    if (hmm) {
+        def ch_hmm_db = channel.fromPath(hmm, checkIfExists: true)
             .map { [ [ id: 'hmm' ], it ] }
-        if (params.hmm_name) {
+        if (hmm_name) {
             // hmmfetch works directly against a raw (unindexed) multi-profile
             // database when given an explicit key -- no separate --index step needed.
-            HMMER_HMMFETCH(ch_hmm_db, params.hmm_name, [], [])
+            HMMER_HMMFETCH(ch_hmm_db, hmm_name, [], [])
             ch_hmm_profile = HMMER_HMMFETCH.out.hmm
         } else {
             ch_hmm_profile = ch_hmm_db
@@ -65,7 +66,7 @@ workflow ENSURE_ALIGNED {
         ch_hmm_profile = channel.empty()
     }
 
-    HMMER_HMMALIGN(ch_unaligned, ch_hmm_profile.map { _meta, hmm -> hmm })
+    HMMER_HMMALIGN(ch_unaligned, ch_hmm_profile.map { _meta, hmm_file -> hmm_file })
 
     HMMER_ESLREFORMAT(HMMER_HMMALIGN.out.sto, '')
 

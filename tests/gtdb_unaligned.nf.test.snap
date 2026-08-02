@@ -16,6 +16,9 @@
                 "EPANG_PLACE": {
                     "epa-ng": "0.3.8"
                 },
+                "GAPFILTER": {
+                    "python": "3.12.12"
+                },
                 "GUNZIP": {
                     "gunzip": 1.13
                 },
@@ -56,7 +59,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-01T20:31:10.668351108",
+        "timestamp": "2026-08-01T22:02:50.413112985",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

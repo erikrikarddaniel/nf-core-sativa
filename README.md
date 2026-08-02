@@ -36,11 +36,12 @@ Using evolutionary placement, it identifies sequences in the alignment that do n
 
 1. Check that names in the two files are consistent and do not contain problematic characters
 2. If the alignment is unaligned, align it via [hmmalign](http://hmmer.org) against an HMM profile (`--hmm`, `--hmm_name`); already-aligned input passes straight through, detected automatically -- no separate mode-switch parameter needed
-3. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
-4. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
-5. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
-6. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
-7. Summarise the run ([MULTIQC](https://multiqc.info/))
+3. Filter out sequences with too high a proportion of alignment gaps to place reliably, reporting them separately rather than silently dropping them (disable with `--skip_gapfilter`; tune the threshold with `--min_nongap`)
+4. Optionally prefilter sequences with [raxtax](https://github.com/noahares/raxtax): quickly self-classify the reference set and report sequences it's already confident are mislabeled, skipping the much more expensive steps below for them (disable with `--skip_raxtax`; tune sensitivity with `--raxtax_filter_rank`)
+5. Create a bifurcating phylogeny with branch-lengths corresponding to the alignment from the taxonomy tree induced by the taxonomy file ([IQTREE](http://www.iqtree.org))
+6. Performa a leave-one-out test by placing each sequence back into the phylogeny after removing it ([EPANG_PLACE](https://github.com/Pbdas/epa-ng))
+7. Score each sequence and produce a table with misplaced sequences, i.e. sequences with likely incorrect taxonomy (SATIVASCORE)
+8. Summarise the run ([MULTIQC](https://multiqc.info/))
 
 ## Usage
 

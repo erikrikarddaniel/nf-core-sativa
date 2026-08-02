@@ -4,8 +4,8 @@ description: |
   Transparently accept unaligned input alongside already-aligned input, with no
   separate mode-switch param. Content already the same length passes through
   unchanged; content that isn't is aligned via hmmalign against an HMM profile
-  (params.hmm, optionally a single named profile from it via params.hmm_name),
-  then converted back to plain FASTA.
+  (hmm, optionally a single named profile from it via hmm_name), then converted
+  back to plain FASTA.
 keywords:
   - alignment
   - hmmer
@@ -24,6 +24,16 @@ input:
         Sequences in FASTA format, aligned or not
         Structure: path(alignment)
       pattern: "*.{fa,fasta,fna,alnfna,mfa}"
+  - hmm:
+      type: string
+      description: |
+        Path to an HMM profile database, used to align ch_alignment via hmmalign if it
+        turns out to be unaligned. Null/empty if not needed (already-aligned input).
+  - hmm_name:
+      type: string
+      description: |
+        Name of a specific profile to extract from hmm, if that database holds more
+        than one. Null/empty otherwise.
 output:
   - alignment:
       type: file

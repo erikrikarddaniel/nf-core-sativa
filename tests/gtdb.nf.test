@@ -24,7 +24,9 @@ nextflow_pipeline {
                 // Every sequence goes through EPA-ng placement and SATIVASCORE directly;
                 // no raxtax step runs at all.
                 { assert !new File("$outputDir/raxtaxformat").exists() },
-                { assert summary.contains('sequences scored: 121') },
+                // 121 real sequences minus the 16 that fall below GAPFILTER's default
+                // min_nongap threshold (0.3) in this taxonomically broad alignment.
+                { assert summary.contains('sequences scored: 105') },
                 // DupHaloA/DupSulfoA is a deliberate swapped-label pair (maximally
                 // divergent phyla) -- an unambiguous positive control that SATIVASCORE's
                 // full phylogenetic placement must catch even without raxtax's help.
