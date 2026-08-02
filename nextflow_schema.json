@@ -25,7 +25,7 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "pattern": "^\\S+\\.(aln)|(phy)|(alnf[na]a)|(mfa)|(fa)|(fasta)$",
+                    "pattern": "^\\S+\\.(aln)|(phy)|(alnf[na]a)|(mfa)|(f[na]a)|(fa)|(fasta)$",
                     "description": "Path to a sequences file, aligned or not, in phylip (.phy), Clustal (.aln) or fasta format (.fa, .fasta, .mfa, .alnfaa or .alnfna).",
                     "help_text": "Unaligned content is aligned automatically via hmmalign -- see --hmm/--hmm_name.",
                     "fa_icon": "fas fa-file-alt"
