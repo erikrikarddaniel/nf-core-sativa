@@ -22,6 +22,7 @@ Initial release of nf-core/sativa, created with the [nf-core](https://nf-co.re/)
 
 ### `Fixed`
 
+- Conda environments now pull `biopython` from `conda-forge` instead of `bioconda`, whose build stops at 1.70: `-profile conda` failed resolving `bioconda::biopython=1.84` since bioconda never published a matching version ([#NN](https://github.com/nf-core/sativa/pull/NN))
 - `CHECKNAMECONSISTENCY` now rewrites any character outside a safe set (was a small, growing blocklist), preventing real-world sequence identifiers (e.g. GTDB's `ACCESSION~CONTIG` names) from desyncing between the alignment/taxonomy and the tree IQTREE builds, which silently mangles the same characters in leaf names ([#NN](https://github.com/nf-core/sativa/pull/NN))
 - `IQTREE`'s model search is now restricted to the GTR family (`-mset GTR`): ModelFinder could otherwise pick a model name (e.g. `K2P`) that EPA-ng's `--model` doesn't recognise, aborting placement ([#NN](https://github.com/nf-core/sativa/pull/NN))
 - `SATIVALOOSPLIT` now consumes FASTA instead of PHYLIP: EMBOSS's phylip writer truncates sequence names to 10 characters, silently colliding for longer real-world identifiers ([#NN](https://github.com/nf-core/sativa/pull/NN))
