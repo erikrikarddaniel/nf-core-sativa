@@ -3,18 +3,61 @@
 %% Rendered with nf-metro (https://github.com/pinin4fjords/nf-metro), e.g.:
 %%   pip install nf-metro   # or: conda create -n nf-metro -c bioconda nf-metro
 %%   nf-metro render nf-core-sativa_metro_map.mmd --theme nfcore --mode light \
-%%     --embed-font --logo ./nf-core-sativa_logo_light.png \
+%%     --embed-font --logo ./nf-core-taxmarker_logo_light.png \
 %%     --no-chrome-css --no-dark-mode-css -o nf-core-sativa_metro_map_light.svg
 %%   nf-metro render nf-core-sativa_metro_map.mmd --theme nfcore --mode dark \
-%%     --embed-font --logo ./nf-core-sativa_logo_dark.png \
+%%     --embed-font --logo ./nf-core-taxmarker_logo_dark.png \
 %%     --no-chrome-css --no-dark-mode-css -o nf-core-sativa_metro_map_dark.svg
+%% Each render above MUST be followed by a post-process step fixing the legend-box
+%% fill (see IMPORTANT note below) before the file is considered final -- nf-metro
+%% emits `fill="rgba(...)"` BEFORE `class="nf-metro-legend-bg"` on that rect (verify
+%% with `grep -o '<rect[^>]*legend-bg[^>]*>' <file>` if this ever needs revisiting):
+%%   sed -i -E 's/fill="rgba\([^)]*\)"([^>]*class="nf-metro-legend-bg")/fill="#ededed"\1/' \
+%%     nf-core-sativa_metro_map_light.svg
+%%   sed -i -E 's/fill="rgba\([^)]*\)"([^>]*class="nf-metro-legend-bg")/fill="#373737"\1/' \
+%%     nf-core-sativa_metro_map_dark.svg
 %% --no-chrome-css/--no-dark-mode-css: bakes fully static colours (no CSS
 %% var()/light-dark()) since these are two separate static files, not one
 %% runtime-adaptive SVG -- var()/light-dark() render fine in real browsers but
 %% not in older SVG tooling (e.g. Inkscape), confirmed empirically.
 %%
+%% IMPORTANT: nf-metro's own nfcore-light theme correctly specifies a light,
+%% translucent legend/logo box (`rgba(255, 255, 255, 0.8)`) -- but many SVG
+%% renderers/viewers don't reliably support the CSS4 rgba() color function inside an
+%% SVG `fill` attribute and silently fall back to solid black instead of transparent
+%% white. This makes the legend box LOOK like an intentional dark badge (which an
+%% earlier version of this file incorrectly concluded, "fixing" it by swapping to a
+%% dark-variant logo instead) when it's actually a color-parsing bug. Real fix (as of
+%% 2026-08-27): after each nf-metro render, post-process the SVG to replace the
+%% `nf-metro-legend-bg` rect's rgba() fill with the theme's own solid section_fill hex
+%% (#ededed light / #373737 dark, from nf_metro/themes/nfcore.py) -- sidesteps the
+%% parsing gap entirely and gives a normal light-gray (or dark-gray) card matching the
+%% section boxes. With the box correctly light/dark per mode, each render uses its OWN
+%% mode-appropriate logo file (light-variant/dark text for the light render,
+%% dark-variant/light text for the dark render) -- not the same file for both.
+%%
+%% Section layout uses explicit `%%metro grid:` placement (2 rows x 3 cols) rather
+%% than relying on nf-metro's automatic fold-threshold line-wrapping, which produces
+%% crossing/misordered output on this graph's off-track raxtax-flagged branch.
+%% Known cosmetic side effect: nf-metro numbers grid-placed sections in column-major
+%% order (1/3/5 top row, 2/4/6 bottom row) rather than reading order, since its
+%% row-wrap numbering logic is wired to the auto-fold feature, not manual grid
+%% directives. The connecting flow lines and section titles remain unambiguous;
+%% revisit if a future nf-metro version supports correct numbering with explicit grids.
+%%
+%% NOTE (2026-08-27): this reflects the TARGET architecture for the nf-core/taxmarker
+%% proposal (IQTREE -> RAxML-NG; SATIVALOOSPLIT+EPANG_PLACE+SATIVASCORE consolidated
+%% into one call to Auguste Gardette's sativa-epang fork; new CLASSIFIEREXPORT step
+%% emitting ranked reference FASTA files for downstream classifiers -- e.g. DADA2's
+%% assignTaxonomy/addSpecies is one example consumer, not the only one), not what's
+%% implemented yet. RAxML-NG swap has an issue filed; the sativa-epang consolidation is
+%% blocked pending a conda recipe / buildable container for that fork; CLASSIFIEREXPORT's
+%% design (ranking rule, exact per-taxon counts, output format) is still to be discussed.
+%% Revert/update this note once these land. Pipeline title uses the provisional
+%% nf-core/taxmarker name (not yet finalised) -- see project memory project_pipeline_rename.
+%%
 
-%%metro title: nf-core/sativa
+%%metro title: nf-core/taxmarker
 %%metro style: nfcore
 
 %%metro line: main | Main flow | #24B064
@@ -26,11 +69,17 @@
 %%metro file: hmm_in | HMM | HMM profile (optional)
 %%metro file: mislabels_raxtax_out | TSV | Mislabels (raxtax)
 %%metro file: mislabels_out | TSV | Mislabels
+%%metro file: ref_out | FASTA | Ranked reference FASTA (1, 5, 20 per taxon)
 %%metro file: report_out | HTML | MultiQC report
 
 %%metro off_track: mislabels_raxtax_out
 
-%%metro group: SATIVA subworkflow | taxonomytree, iqtree, loosplit, epang, sativascore | above
+%%metro grid: resolve | 0,0
+%%metro grid: align | 1,0
+%%metro grid: filter | 2,0
+%%metro grid: sativa | 0,1
+%%metro grid: export | 1,1
+%%metro grid: report | 2,1
 
 %%metro process: resolvetaxonomy | RESOLVETAXONOMY
 %%metro process: checkname | CHECKNAMECONSISTENCY
@@ -41,10 +90,9 @@
 %%metro process: profilecover | PROFILECOVER
 %%metro process: raxtax | RAXTAX_PREFILTER:.*
 %%metro process: taxonomytree | SWF_SATIVA:TAXONOMYTREE
-%%metro process: iqtree | SWF_SATIVA:IQTREE
-%%metro process: loosplit | SWF_SATIVA:SATIVALOOSPLIT
-%%metro process: epang | SWF_SATIVA:EPANG_PLACE
-%%metro process: sativascore | SWF_SATIVA:SATIVASCORE
+%%metro process: raxmlng | SWF_SATIVA:RAXMLNG_.*
+%%metro process: sativaepang | SWF_SATIVA:SATIVAEPANG
+%%metro process: classifierexport | CLASSIFIEREXPORT
 %%metro process: multiqc | MULTIQC
 
 graph LR
@@ -78,22 +126,20 @@ graph LR
         raxtax -->|raxtax_flagged| mislabels_raxtax_out
     end
 
-    subgraph reftree [Reference tree]
+    subgraph sativa [SATIVA subworkflow]
         taxonomytree[TAXONOMYTREE]
-        iqtree[IQTREE]
-        taxonomytree -->|main| iqtree
-    end
-
-    subgraph loo [Leave-one-out placement]
-        loosplit[SATIVALOOSPLIT]
-        epang[EPANG_PLACE]
-        loosplit -->|main| epang
-    end
-
-    subgraph scoring [Scoring]
-        sativascore[SATIVASCORE]
+        raxmlng[RAxML-NG]
+        sativaepang[sativa-epang]
         mislabels_out[ ]
-        sativascore -->|main| mislabels_out
+        taxonomytree -->|main| raxmlng
+        raxmlng -->|main| sativaepang
+        sativaepang -->|main| mislabels_out
+    end
+
+    subgraph export [Reference export]
+        classifierexport[CLASSIFIEREXPORT]
+        ref_out[ ]
+        classifierexport -->|main| ref_out
     end
 
     subgraph report [Reporting]
@@ -106,6 +152,5 @@ graph LR
     checkaligned -->|main| gapfilter
     hmmalign -->|unaligned| profilecover
     raxtax -->|main| taxonomytree
-    iqtree -->|main| loosplit
-    epang -->|main| sativascore
-    sativascore -->|main| multiqc
+    sativaepang -->|main| classifierexport
+    classifierexport -->|main| multiqc
