@@ -9,10 +9,9 @@
       3. Score placements, report mismatches              (mislabels_handler.py)
 
 main.nf
-  └── PIPELINE_INITIALISATION   (subworkflows/local/utils_nfcore_sativa_pipeline/main.nf)
-        validates params, parses samplesheet → ch_samplesheet channel
-  └── NFCORE_SATIVA
-        └── SATIVA               (workflows/sativa.nf)  ← main logic lives here
+  └── PIPELINE_INITIALISATION   (subworkflows/local/utils_nfcore_taxmarker_pipeline/main.nf)
+  └── NFCORE_TAXMARKER
+        └── TAXMARKER            (workflows/taxmarker.nf)  ← main logic lives here
               ├── CHECKNAMECONSISTENCY  (modules/local/checknameconsistency/)
               ├── ENSURE_ALIGNED        (subworkflows/local/ensure_aligned/) -- transparently
               │     aligns unaligned input via hmmalign (params.hmm); already-aligned
@@ -22,9 +21,8 @@ main.nf
               │     drops severely mislabeled sequences before this subworkflow ever sees
               │     them, reporting them directly instead
               ├── SATIVA (this subworkflow)
-              ├── FASTQC          (modules/nf-core/fastqc/)
               └── MULTIQC         (modules/nf-core/multiqc/)
-  └── PIPELINE_COMPLETION        (subworkflows/local/utils_nfcore_sativa_pipeline/main.nf)
+  └── PIPELINE_COMPLETION        (subworkflows/local/utils_nfcore_taxmarker_pipeline/main.nf)
         sends email / completion summary
 
     Required nf-core modules (install before use):
