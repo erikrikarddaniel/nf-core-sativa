@@ -4,7 +4,7 @@ This file provides guidance to coding agents (e.g. Claude Code) when working wit
 
 ## Project Overview
 
-**nf-core/taxmarker** is a Nextflow bioinformatics pipeline that checks sequences for their phylogenetic signal against their taxonomy. It is built from the nf-core template (v4.0.2) and uses Nextflow DSL2. The pipeline is currently in early development (v1.0.0dev) — many `TODO nf-core:` comments mark where domain-specific logic still needs to be added.
+**nf-core/taxmarker** is a Nextflow bioinformatics pipeline, a re-implementation of the Sativa algorithm (Kozlov et al. 2016), that identifies taxonomically mislabelled sequences by evolutionary placement: it builds a phylogeny from a declared taxonomy, places each sequence back into it after removing it (leave-one-out), and flags sequences whose phylogenetic signal doesn't agree with their declared taxonomy. It is built from the nf-core template (currently synced to v4.1.0) and uses Nextflow DSL2. The pipeline is currently in early development (v1.0.0dev, not yet released or transferred to the nf-core org).
 
 Requires Nextflow ≥ 25.10.4.
 
@@ -13,7 +13,7 @@ Requires Nextflow ≥ 25.10.4.
 **Run the pipeline (with Docker):**
 
 ```bash
-nextflow run main.nf -profile docker --input samplesheet.csv --outdir results
+nextflow run main.nf -profile docker --sequences sequences.fasta --taxonomy taxonomy.tsv --outdir results
 ```
 
 **Run minimal test suite:**
@@ -36,10 +36,10 @@ nf-test test
 nf-core pipelines lint
 ```
 
-**Format code (Prettier + Nextflow lint via pre-commit):**
+**Format code (Prettier + Nextflow lint via prek/pre-commit):**
 
 ```bash
-pre-commit run --all-files
+prek run -a
 ```
 
 **Update nf-core modules:**
@@ -55,23 +55,45 @@ nf-core modules update <module-name>
 ```
 main.nf
   └── PIPELINE_INITIALISATION   (subworkflows/local/utils_nfcore_taxmarker_pipeline/main.nf)
-        validates params, parses samplesheet → ch_samplesheet channel
+        validates params, resolves --taxonomy/--sequences into channels
   └── NFCORE_TAXMARKER
         └── TAXMARKER            (workflows/taxmarker.nf)  ← main logic lives here
-              ├── FASTQC          (modules/nf-core/fastqc/)
-              └── MULTIQC         (modules/nf-core/multiqc/)
+              ├── RESOLVETAXONOMY       (modules/local/resolvetaxonomy/) -- from --taxonomy,
+              │     or derived from --sequences record headers if omitted (GTDB-style)
+              ├── CHECKNAMECONSISTENCY  (modules/local/checknameconsistency/) -- validates
+              │     taxonomy/sequences names match, rewrites problematic characters
+              ├── EMBOSS_SEQRET         (modules/nf-core/emboss/seqret/) -- normalises to FASTA
+              ├── ENSURE_ALIGNED        (subworkflows/local/ensure_aligned/) -- transparently
+              │     aligns unaligned input via hmmalign (--hmm/--hmm_name); already-aligned
+              │     input passes through unchanged
+              ├── GAPFILTER / PROFILECOVER (modules/local/{gapfilter,profilecover}/) --
+              │     drop sequences too short/incomplete to place reliably (whichever of
+              │     ENSURE_ALIGNED's two branches ran); each has its own skip flag
+              ├── RAXTAX_PREFILTER      (subworkflows/local/raxtax_prefilter/) -- optional,
+              │     --skip_raxtax to disable; fast raxtax self-classification triage that
+              │     flags severely mislabeled sequences before the expensive placement step
+              ├── SATIVA (subworkflows/local/sativa/) -- optional, --skip_sativa to disable;
+              │     builds the reference tree (IQTREE, being swapped for RAxML-NG -- see
+              │     issue #8), leave-one-out places every sequence via EPA-ng, and scores
+              │     each one (SATIVASCORE) to flag likely mislabels
+              └── MULTIQC               (modules/nf-core/multiqc/)
   └── PIPELINE_COMPLETION        (subworkflows/local/utils_nfcore_taxmarker_pipeline/main.nf)
         sends email / completion summary
 ```
 
+Skipping `--skip_sativa` turns the rest of the pipeline into a general-purpose
+taxonomy-resolution/alignment/prefilter QC tool; the raxtax prefilter and gap/profile-cover
+filters still run as configured. See `README.md` for the full parameter list.
+
 ### Key conventions
 
 - **Module arguments**: Pass extra CLI flags to tools via `ext.args` in `conf/modules.config`, not in the module itself.
-- **Output paths**: Default publish rule in `conf/modules.config` derives directory from the process name (e.g., `FASTQC` → `outdir/fastqc/`). Override per-process with a `publishDir` block.
-- **Samplesheet input**: Validated against `assets/schema_input.json`. Required columns: `sample`, `fastq_1`; optional: `fastq_2`. Single-end vs. paired-end is inferred from the presence of `fastq_2`.
+- **Output paths**: Default publish rule in `conf/modules.config` derives directory from the process name (e.g., `RESOLVETAXONOMY` → `outdir/resolvetaxonomy/`). Override per-process with a `publishDir` block.
+- **Input**: No samplesheet -- `--sequences` (phylip/clustal/fasta, aligned or not) and an optional `--taxonomy` (TSV; derived from `--sequences` headers if omitted, GTDB-style). Validated implicitly by `RESOLVETAXONOMY`/`CHECKNAMECONSISTENCY`, not a JSON schema file.
 - **Parameter schema**: `nextflow_schema.json` defines all pipeline parameters and is used for CLI validation (via nf-schema plugin) and help text generation.
 - **Software versions**: Collected via a `channel.topic("versions")` stream and written to `pipeline_info/nf_core_taxmarker_software_mqc_versions.yml` for MultiQC.
 - **nf-core modules**: Modules under `modules/nf-core/` and subworkflows under `subworkflows/nf-core/` are managed by nf-core tools — do not edit them directly. Custom/local code goes in `subworkflows/local/`.
+- **Tool identity vs. pipeline identity**: `subworkflows/local/sativa/`, `modules/local/sativascore`, `modules/local/sativaloosplit`, and `--skip_sativa` all name the wrapped SATIVA placement algorithm specifically (planned to be proposed upstream as its own nf-core subworkflow) — they are not renamed when the pipeline itself was renamed from `sativa` to `taxmarker`.
 
 ### Container registries
 
@@ -80,5 +102,6 @@ All container profiles (`docker`, `singularity`, `apptainer`, etc.) default to `
 ### Test infrastructure
 
 - `nf-test.config` defines test directories and triggers (files that force a full test run when changed).
-- Tests run with `-profile test` by default; the test profile uses nf-core's public test datasets hosted on GitHub.
+- Tests run with `-profile test` by default; other pipeline-level profiles exercise specific input shapes: `test_fasta`, `test_clustal`, `test_gtdb`, `test_gtdb_unaligned`, `test_gtdb_embedded`, `test_full`.
+- Test fixtures are fetched remotely from the `sativa` branch of `erikrikarddaniel/test-datasets` (`params.pipelines_testdata_base_path`) — no test data is committed to this repo. That branch name still says `sativa`; it hasn't been renamed to match the pipeline yet.
 - Snapshot files (`*.snap`) track expected outputs — update them with `nf-test test --update-snapshot` after intentional output changes.
