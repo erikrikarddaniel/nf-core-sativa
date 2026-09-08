@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the nf-core/sativa pipeline
+// Subworkflow with functionality specific to the nf-core/taxmarker pipeline
 //
 
 /*
@@ -63,7 +63,7 @@ workflow PIPELINE_INITIALISATION {
 \033[0;34m  |\\ | |__  __ /  ` /  \\ |__) |__         \033[0;33m}  {\033[0m
 \033[0;34m  | \\| |       \\__, \\__/ |  \\ |___     \033[0;32m\\`-._,-`-,\033[0m
                                         \033[0;32m`._,._,\'\033[0m
-\033[0;35m  nf-core/sativa ${workflow.manifest.version}\033[0m
+\033[0;35m  nf-core/taxmarker ${workflow.manifest.version}\033[0m
 -\033[2m----------------------------------------------------\033[0m-
 """
     after_text = """${workflow.manifest.doi ? "\n* The pipeline\n" : ""}${workflow.manifest.doi.tokenize(",").collect { doi -> "    https://doi.org/${doi.trim().replace('https://doi.org/','')}"}.join("\n")}${workflow.manifest.doi ? "\n" : ""}
@@ -71,7 +71,7 @@ workflow PIPELINE_INITIALISATION {
     https://doi.org/10.1038/s41587-020-0439-x
 
 * Software dependencies
-    https://github.com/nf-core/sativa/blob/master/CITATIONS.md
+    https://github.com/nf-core/taxmarker/blob/master/CITATIONS.md
 """
     if (monochrome_logs) {
         before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
@@ -88,7 +88,8 @@ workflow PIPELINE_INITIALISATION {
         show_hidden,
         before_text,
         after_text,
-        command
+        command,
+        false
     )
 
     //
