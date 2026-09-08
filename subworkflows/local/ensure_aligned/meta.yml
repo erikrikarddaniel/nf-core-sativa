@@ -10,7 +10,7 @@ keywords:
   - alignment
   - hmmer
   - hmmalign
-  - sativa
+  - taxmarker
 components:
   - checkaligned
   - hmmer/hmmfetch

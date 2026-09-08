@@ -7,7 +7,7 @@ description: |
 keywords:
   - alignment
   - fasta
-  - sativa
+  - taxmarker
 tools:
   - "sativa":
       description: "Freely available tools for computational molecular biology."

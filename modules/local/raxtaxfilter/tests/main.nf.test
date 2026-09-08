@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/raxtaxfilter"
+    tag "taxmarker"
+    tag "taxmarker/raxtaxfilter"
 
-    test("sativa - default rank (species, leaf-count 1)") {
+    test("taxmarker - default rank (species, leaf-count 1)") {
 
         when {
             process {
@@ -55,7 +55,7 @@ nextflow_process {
 
     }
 
-    test("sativa - coarse rank (genus, leaf-count 2)") {
+    test("taxmarker - coarse rank (genus, leaf-count 2)") {
 
         config "./nextflow.config"
 
@@ -94,7 +94,7 @@ nextflow_process {
 
     }
 
-    test("sativa - default rank - stub") {
+    test("taxmarker - default rank - stub") {
 
         options "-stub"
 

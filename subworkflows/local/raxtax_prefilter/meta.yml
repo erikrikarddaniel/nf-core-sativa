@@ -10,7 +10,7 @@ keywords:
   - taxonomy
   - raxtax
   - prefilter
-  - sativa
+  - taxmarker
 components:
   - emboss/seqret
   - raxtaxformat

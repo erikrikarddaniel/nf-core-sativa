@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/checknameconsistency"
+    tag "taxmarker"
+    tag "taxmarker/checknameconsistency"
 
-    test("sativa - consistent names, one with punctuation") {
+    test("taxmarker - consistent names, one with punctuation") {
 
         when {
             process {
@@ -55,7 +55,7 @@ nextflow_process {
 
     }
 
-    test("sativa - name missing from taxonomy fails") {
+    test("taxmarker - name missing from taxonomy fails") {
 
         when {
             process {
@@ -76,7 +76,7 @@ nextflow_process {
 
     }
 
-    test("sativa - extra name in taxonomy fails") {
+    test("taxmarker - extra name in taxonomy fails") {
 
         when {
             process {
@@ -97,7 +97,7 @@ nextflow_process {
 
     }
 
-    test("sativa - names colliding after rewrite fails") {
+    test("taxmarker - names colliding after rewrite fails") {
 
         when {
             process {
@@ -118,7 +118,7 @@ nextflow_process {
 
     }
 
-    test("sativa - consistent names, one with punctuation - stub") {
+    test("taxmarker - consistent names, one with punctuation - stub") {
 
         options "-stub"
 

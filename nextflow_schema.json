@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/sativa/master/nextflow_schema.json",
-    "title": "nf-core/sativa pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/nf-core/taxmarker/master/nextflow_schema.json",
+    "title": "nf-core/taxmarker pipeline parameters",
     "description": "This pipeline checks sequences for their phylogenetic signal against their taxonomy",
     "type": "object",
     "$defs": {

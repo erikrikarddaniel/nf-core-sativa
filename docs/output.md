@@ -1,4 +1,4 @@
-# nf-core/sativa: Output
+# nf-core/taxmarker: Output
 
 ## Introduction
 

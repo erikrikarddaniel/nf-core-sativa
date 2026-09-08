@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/sativa
+    nf-core/taxmarker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/sativa
-    Website: https://nf-co.re/sativa
-    Slack  : https://nfcore.slack.com/channels/sativa
+    Github : https://github.com/nf-core/taxmarker
+    Website: https://nf-co.re/taxmarker
+    Slack  : https://nfcore.slack.com/channels/taxmarker
 ----------------------------------------------------------------------------------------
 */
 
@@ -15,9 +15,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SATIVA                  } from './workflows/sativa'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_sativa_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_sativa_pipeline'
+include { TAXMARKER               } from './workflows/taxmarker'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_taxmarker_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_taxmarker_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -27,7 +27,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_sati
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow NFCORE_SATIVA {
+workflow NFCORE_TAXMARKER {
 
     take:
     taxonomy  // channel: taxonomy file
@@ -38,7 +38,7 @@ workflow NFCORE_SATIVA {
     //
     // WORKFLOW: Run pipeline
     //
-    SATIVA (
+    TAXMARKER (
         taxonomy,
         sequences,
         params.skip_raxtax,
@@ -53,7 +53,7 @@ workflow NFCORE_SATIVA {
         params.outdir,
     )
     emit:
-    multiqc_report = SATIVA.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = TAXMARKER.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,7 +83,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_SATIVA (
+    NFCORE_TAXMARKER (
         PIPELINE_INITIALISATION.out.taxonomy,
         PIPELINE_INITIALISATION.out.sequences
     )
@@ -97,7 +97,7 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        NFCORE_SATIVA.out.multiqc_report
+        NFCORE_TAXMARKER.out.multiqc_report
     )
 }
 

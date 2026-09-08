@@ -11,10 +11,10 @@
          at params.raxtax_filter_rank                       (RAXTAXFILTER)
 
     The alignment is expected to already be normalised to FASTA by the caller
-    (workflows/sativa.nf) -- this subworkflow no longer does that itself.
+    (workflows/taxmarker.nf) -- this subworkflow no longer does that itself.
 
     Sequences RAXTAXFILTER flags never reach EPA-ng placement: they're reported
-    directly in the final mislabels output (see workflows/sativa.nf), tagged
+    directly in the final mislabels output (see workflows/taxmarker.nf), tagged
     method=raxtax to distinguish them from SATIVASCORE's own (method=sativa) rows.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */

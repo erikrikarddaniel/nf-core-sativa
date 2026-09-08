@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/gapfilter"
+    tag "taxmarker"
+    tag "taxmarker/gapfilter"
 
-    test("sativa - pipeline default threshold (0.3)") {
+    test("taxmarker - pipeline default threshold (0.3)") {
 
         // No local config override: exercises conf/modules.config's real
         // `ext.args = "--min-nongap ${params.min_nongap}"`, i.e. the pipeline's
@@ -57,7 +57,7 @@ nextflow_process {
 
     }
 
-    test("sativa - strict threshold (0.8) drops SeqBad1 too") {
+    test("taxmarker - strict threshold (0.8) drops SeqBad1 too") {
 
         config "./nextflow.config"
 
@@ -91,7 +91,7 @@ nextflow_process {
 
     }
 
-    test("sativa - default threshold - stub") {
+    test("taxmarker - default threshold - stub") {
 
         options "-stub"
 

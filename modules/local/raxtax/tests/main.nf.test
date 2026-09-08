@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/raxtax"
+    tag "taxmarker"
+    tag "taxmarker/raxtax"
 
-    test("sativa - self-classification, one mislabelled sequence") {
+    test("taxmarker - self-classification, one mislabelled sequence") {
 
         when {
             process {
@@ -43,7 +43,7 @@ nextflow_process {
 
     }
 
-    test("sativa - self-classification, one mislabelled sequence - stub") {
+    test("taxmarker - self-classification, one mislabelled sequence - stub") {
 
         options "-stub"
 

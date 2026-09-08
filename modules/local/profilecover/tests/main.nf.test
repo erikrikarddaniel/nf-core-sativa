@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/profilecover"
+    tag "taxmarker"
+    tag "taxmarker/profilecover"
 
-    test("sativa - pipeline default threshold (0.8)") {
+    test("taxmarker - pipeline default threshold (0.8)") {
 
         // No local config override: exercises conf/modules.config's real
         // `ext.args = "--min-coverage ${params.min_profile_cover}"`, i.e. the
@@ -60,7 +60,7 @@ nextflow_process {
 
     }
 
-    test("sativa - lenient threshold (0.2) keeps SeqBad1 too") {
+    test("taxmarker - lenient threshold (0.2) keeps SeqBad1 too") {
 
         config "./nextflow.config"
 
@@ -94,7 +94,7 @@ nextflow_process {
 
     }
 
-    test("sativa - default threshold - stub") {
+    test("taxmarker - default threshold - stub") {
 
         options "-stub"
 

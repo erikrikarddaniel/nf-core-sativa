@@ -1,21 +1,21 @@
 %%
-%% Source for docs/images/nf-core-sativa_metro_map_{light,dark}.svg.
+%% Source for docs/images/nf-core-taxmarker_metro_map_{light,dark}.svg.
 %% Rendered with nf-metro (https://github.com/pinin4fjords/nf-metro), e.g.:
 %%   pip install nf-metro   # or: conda create -n nf-metro -c bioconda nf-metro
-%%   nf-metro render nf-core-sativa_metro_map.mmd --theme nfcore --mode light \
+%%   nf-metro render nf-core-taxmarker_metro_map.mmd --theme nfcore --mode light \
 %%     --embed-font --logo ./nf-core-taxmarker_logo_light.png \
-%%     --no-chrome-css --no-dark-mode-css -o nf-core-sativa_metro_map_light.svg
-%%   nf-metro render nf-core-sativa_metro_map.mmd --theme nfcore --mode dark \
+%%     --no-chrome-css --no-dark-mode-css -o nf-core-taxmarker_metro_map_light.svg
+%%   nf-metro render nf-core-taxmarker_metro_map.mmd --theme nfcore --mode dark \
 %%     --embed-font --logo ./nf-core-taxmarker_logo_dark.png \
-%%     --no-chrome-css --no-dark-mode-css -o nf-core-sativa_metro_map_dark.svg
+%%     --no-chrome-css --no-dark-mode-css -o nf-core-taxmarker_metro_map_dark.svg
 %% Each render above MUST be followed by a post-process step fixing the legend-box
 %% fill (see IMPORTANT note below) before the file is considered final -- nf-metro
 %% emits `fill="rgba(...)"` BEFORE `class="nf-metro-legend-bg"` on that rect (verify
 %% with `grep -o '<rect[^>]*legend-bg[^>]*>' <file>` if this ever needs revisiting):
 %%   sed -i -E 's/fill="rgba\([^)]*\)"([^>]*class="nf-metro-legend-bg")/fill="#ededed"\1/' \
-%%     nf-core-sativa_metro_map_light.svg
+%%     nf-core-taxmarker_metro_map_light.svg
 %%   sed -i -E 's/fill="rgba\([^)]*\)"([^>]*class="nf-metro-legend-bg")/fill="#373737"\1/' \
-%%     nf-core-sativa_metro_map_dark.svg
+%%     nf-core-taxmarker_metro_map_dark.svg
 %% --no-chrome-css/--no-dark-mode-css: bakes fully static colours (no CSS
 %% var()/light-dark()) since these are two separate static files, not one
 %% runtime-adaptive SVG -- var()/light-dark() render fine in real browsers but

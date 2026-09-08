@@ -12,7 +12,7 @@ template:
     their taxonomy
   force: false
   is_nfcore: true
-  name: sativa
+  name: taxmarker
   org: nf-core
   outdir: .
   skip_features:

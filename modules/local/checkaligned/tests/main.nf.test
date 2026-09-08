@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/checkaligned"
+    tag "taxmarker"
+    tag "taxmarker/checkaligned"
 
-    test("sativa - equal-length fasta is aligned") {
+    test("taxmarker - equal-length fasta is aligned") {
 
         when {
             process {
@@ -34,7 +34,7 @@ nextflow_process {
 
     }
 
-    test("sativa - varying-length fasta is unaligned") {
+    test("taxmarker - varying-length fasta is unaligned") {
 
         when {
             process {
@@ -59,7 +59,7 @@ nextflow_process {
 
     }
 
-    test("sativa - equal-length fasta is aligned - stub") {
+    test("taxmarker - equal-length fasta is aligned - stub") {
 
         options "-stub"
 

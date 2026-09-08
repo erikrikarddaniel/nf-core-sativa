@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/sativa",
-    "homePage": "https://github.com/nf-core/sativa",
+    "name": "nf-core/taxmarker",
+    "homePage": "https://github.com/nf-core/taxmarker",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

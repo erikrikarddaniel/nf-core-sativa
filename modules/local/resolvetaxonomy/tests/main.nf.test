@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/resolvetaxonomy"
+    tag "taxmarker"
+    tag "taxmarker/resolvetaxonomy"
 
-    test("sativa - embedded taxonomy, no external file") {
+    test("taxmarker - embedded taxonomy, no external file") {
 
         when {
             process {
@@ -44,7 +44,7 @@ nextflow_process {
 
     }
 
-    test("sativa - external taxonomy file wins, warns on ignored embedded text") {
+    test("taxmarker - external taxonomy file wins, warns on ignored embedded text") {
 
         when {
             process {
@@ -79,7 +79,7 @@ nextflow_process {
 
     }
 
-    test("sativa - external taxonomy file, no embedded text, no warning") {
+    test("taxmarker - external taxonomy file, no embedded text, no warning") {
 
         when {
             process {
@@ -106,7 +106,7 @@ nextflow_process {
 
     }
 
-    test("sativa - neither taxonomy file nor embedded text fails clearly") {
+    test("taxmarker - neither taxonomy file nor embedded text fails clearly") {
 
         when {
             process {
@@ -127,7 +127,7 @@ nextflow_process {
 
     }
 
-    test("sativa - embedded taxonomy - stub") {
+    test("taxmarker - embedded taxonomy - stub") {
 
         options "-stub"
 

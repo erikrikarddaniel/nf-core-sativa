@@ -7,7 +7,7 @@ include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sativa_pipeline'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_taxmarker_pipeline'
 include { RESOLVETAXONOMY        } from '../modules/local/resolvetaxonomy/main'
 include { CHECKNAMECONSISTENCY   } from '../modules/local/checknameconsistency/main'
 include { EMBOSS_SEQRET          } from '../modules/nf-core/emboss/seqret/main'
@@ -23,7 +23,7 @@ include { SATIVA as SWF_SATIVA   } from '../subworkflows/local/sativa'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow SATIVA {
+workflow TAXMARKER {
 
     take:
     ch_taxonomy        // channel: taxonomy file, or [] if not provided (derived from --sequences headers instead)
@@ -68,7 +68,7 @@ workflow SATIVA {
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${outdir}/pipeline_info",
-            name: 'nf_core_'  +  'sativa_software_'  + 'mqc_'  + 'versions.yml',
+            name: 'nf_core_'  +  'taxmarker_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
         )
@@ -265,7 +265,7 @@ workflow SATIVA {
     MULTIQC(
         ch_multiqc_files.flatten().collect().map { files ->
             [
-                [id: 'sativa'],
+                [id: 'taxmarker'],
                 files,
                 multiqc_config
                     ? file(multiqc_config, checkIfExists: true)

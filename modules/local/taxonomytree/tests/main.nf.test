@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/taxonomytree"
+    tag "taxmarker"
+    tag "taxmarker/taxonomytree"
 
-    test("sativa - taxonomy tsv") {
+    test("taxmarker - taxonomy tsv") {
 
         when {
             process {
@@ -46,7 +46,7 @@ nextflow_process {
 
     }
 
-    test("sativa - taxonomy tsv - stub") {
+    test("taxmarker - taxonomy tsv - stub") {
 
         options "-stub"
 

@@ -33,7 +33,7 @@
                     "python": "3.11.10"
                 },
                 "Workflow": {
-                    "nf-core/sativa": "v1.0.0dev"
+                    "nf-core/taxmarker": "v1.0.0dev"
                 }
             },
             [
@@ -142,7 +142,7 @@
                 "multiqc/multiqc_data/multiqc_sources.txt",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
-                "pipeline_info/nf_core_sativa_software_mqc_versions.yml",
+                "pipeline_info/nf_core_taxmarker_software_mqc_versions.yml",
                 "resolvetaxonomy",
                 "resolvetaxonomy/user-alignment.resolved.phy",
                 "resolvetaxonomy/user-alignment.resolved.tax",

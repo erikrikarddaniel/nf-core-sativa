@@ -32,7 +32,7 @@
     a directly-provided alignment (e.g. from MAFFT) is naturally wide with real
     cross-lineage indels even for full-length sequences, whereas this subworkflow's
     masked hmmalign output has a fixed-length, much tighter distribution (see
-    GAPFILTER vs PROFILECOVER in workflows/sativa.nf).
+    GAPFILTER vs PROFILECOVER in workflows/taxmarker.nf).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 

@@ -6,10 +6,10 @@ nextflow_process {
 
     tag "modules"
     tag "modules_local"
-    tag "sativa"
-    tag "sativa/raxtaxformat"
+    tag "taxmarker"
+    tag "taxmarker/raxtaxformat"
 
-    test("sativa - aligned gappy fasta") {
+    test("taxmarker - aligned gappy fasta") {
 
         when {
             process {
@@ -49,7 +49,7 @@ nextflow_process {
 
     }
 
-    test("sativa - aligned gappy fasta - stub") {
+    test("taxmarker - aligned gappy fasta - stub") {
 
         options "-stub"
 

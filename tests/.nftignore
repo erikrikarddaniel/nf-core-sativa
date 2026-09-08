@@ -29,6 +29,6 @@ sativascore/user-alignment.mislabels.tsv
 sativascore/user-alignment.summary.txt
 
 # The final merged mislabels report (SATIVASCORE rows + any raxtax rows, see
-# workflows/sativa.nf's collectFile) inherits the same nondeterminism, since it's
+# workflows/taxmarker.nf's collectFile) inherits the same nondeterminism, since it's
 # built directly from sativascore/user-alignment.mislabels.tsv above.
 mislabels/user-alignment.mislabels.tsv

@@ -7,9 +7,9 @@ nextflow_workflow {
     tag "subworkflows"
     tag "subworkflows_local"
     tag "subworkflows/ensure_aligned"
-    tag "sativa"
+    tag "taxmarker"
 
-    test("sativa - already aligned, passes through unchanged") {
+    test("taxmarker - already aligned, passes through unchanged") {
 
         when {
             workflow {
@@ -37,7 +37,7 @@ nextflow_workflow {
 
     }
 
-    test("sativa - unaligned, realigned via hmmalign") {
+    test("taxmarker - unaligned, realigned via hmmalign") {
 
         when {
             workflow {
@@ -81,7 +81,7 @@ nextflow_workflow {
 
     }
 
-    test("sativa - unaligned without --hmm fails clearly") {
+    test("taxmarker - unaligned without --hmm fails clearly") {
 
         when {
             workflow {

@@ -32,7 +32,7 @@ nextflow_pipeline {
                 // full phylogenetic placement must catch even without raxtax's help.
                 { assert mislabels.contains('DupHaloA') },
                 { assert mislabels.contains('DupSulfoA') },
-                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_raxtax_disabled") },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_taxmarker_software_mqc_versions.yml")).match("versions_raxtax_disabled") },
             )
         }
 
@@ -61,7 +61,7 @@ nextflow_pipeline {
                 // volcanii: genus agrees, species doesn't -- flagged at the default
                 // (species-level) rank.
                 { assert mislabels =~ /Haloferax prahovense[^\n]*\traxtax/ },
-                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_default_rank") },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_taxmarker_software_mqc_versions.yml")).match("versions_default_rank") },
             )
         }
 
@@ -89,7 +89,7 @@ nextflow_pipeline {
                 // sister species' genus) -- proves the single-check-point rank semantics
                 // at the whole-pipeline level, not just in RAXTAXFILTER's own unit test.
                 { assert !(mislabels =~ /Haloferax prahovense[^\n]*\traxtax/) },
-                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_coarse_rank") },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_taxmarker_software_mqc_versions.yml")).match("versions_coarse_rank") },
             )
         }
 
@@ -123,7 +123,7 @@ nextflow_pipeline {
                 { assert !new File("$outputDir/sativaloosplit").exists() },
                 { assert !new File("$outputDir/epang").exists() },
                 { assert !new File("$outputDir/sativascore").exists() },
-                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions_sativa_skipped") },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_taxmarker_software_mqc_versions.yml")).match("versions_sativa_skipped") },
             )
         }
 

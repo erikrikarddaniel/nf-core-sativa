@@ -1,13 +1,13 @@
 <h1>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-sativa_logo_dark.png">
-    <img alt="nf-core/sativa" src="docs/images/nf-core-sativa_logo_light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-taxmarker_logo_dark.png">
+    <img alt="nf-core/taxmarker" src="docs/images/nf-core-taxmarker_logo_light.png">
   </picture>
 </h1>
 
-[![Open in GitHub Codespaces](https://img.shields.io/badge/Open_In_GitHub_Codespaces-black?labelColor=grey&logo=github)](https://github.com/codespaces/new/nf-core/sativa)
-[![GitHub Actions CI Status](https://github.com/nf-core/sativa/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/sativa/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/nf-core/sativa/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/sativa/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/sativa/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![Open in GitHub Codespaces](https://img.shields.io/badge/Open_In_GitHub_Codespaces-black?labelColor=grey&logo=github)](https://github.com/codespaces/new/nf-core/taxmarker)
+[![GitHub Actions CI Status](https://github.com/nf-core/taxmarker/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/taxmarker/actions/workflows/nf-test.yml)
+[![GitHub Actions Linting Status](https://github.com/nf-core/taxmarker/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/taxmarker/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/taxmarker/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A525.10.4-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
@@ -15,13 +15,13 @@
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/sativa)
+[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/taxmarker)
 
-[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23sativa-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/sativa)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
+[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23taxmarker-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/taxmarker)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
 ## Introduction
 
-**nf-core/sativa** is a re-implementation of the Sativa pipeline by Kozlov et al. [2016] that identifies taxonomically mislabelled sequences.
+**nf-core/taxmarker** is a re-implementation of the Sativa pipeline by Kozlov et al. [2016] that identifies taxonomically mislabelled sequences.
 It takes as input a sequences file (aligned or unaligned) and a file describing the proposed taxonomy of each sequence.
 Using evolutionary placement, it identifies sequences in the alignment that do not have a phylogenetic signal that corresponds to their taxonomies.
 
@@ -30,8 +30,8 @@ Using evolutionary placement, it identifies sequences in the alignment that do n
 > More testing is needed to evaluate these differences.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-sativa_metro_map_dark.svg">
-  <img alt="nf-core/sativa workflow metro map" src="docs/images/nf-core-sativa_metro_map_light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-taxmarker_metro_map_dark.svg">
+  <img alt="nf-core/taxmarker workflow metro map" src="docs/images/nf-core-taxmarker_metro_map_light.svg">
 </picture>
 
 > [!NOTE]
@@ -94,7 +94,7 @@ Now, you can run the pipeline using:
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
-nextflow run nf-core/sativa \
+nextflow run nf-core/taxmarker \
    -profile <docker/singularity/.../institute> \
    --sequences sequences.phy \
    --taxonomy taxonomy.tsv \
@@ -104,17 +104,17 @@ nextflow run nf-core/sativa \
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/running/run-pipelines#using-parameter-files).
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/sativa/usage) and the [parameter documentation](https://nf-co.re/sativa/parameters).
+For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/taxmarker/usage) and the [parameter documentation](https://nf-co.re/taxmarker/parameters).
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/sativa/results) tab on the nf-core website pipeline page.
+To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/taxmarker/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/sativa/output).
+[output documentation](https://nf-co.re/taxmarker/output).
 
 ## Credits
 
-The Sativa tool was originally written by Alexey Kozlov et al. (see citation below) and ported to Nextflow as nf-core/sativa by Daniel Lundin.
+The Sativa tool was originally written by Alexey Kozlov et al. (see citation below) and ported to Nextflow as nf-core/taxmarker by Daniel Lundin.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
@@ -124,11 +124,11 @@ We thank the following people for their extensive assistance in the development 
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](docs/CONTRIBUTING.md).
 
-For further information or help, don't hesitate to get in touch on the [Slack `#sativa` channel](https://nfcore.slack.com/channels/sativa) (you can join with [this invite](https://nf-co.re/join/slack)).
+For further information or help, don't hesitate to get in touch on the [Slack `#taxmarker` channel](https://nfcore.slack.com/channels/taxmarker) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
 
-If you use nf-core/sativa for your analysis, please cite the original article for the algorithm:
+If you use nf-core/taxmarker for your analysis, please cite the original article for the algorithm:
 
 > **Phylogeny-Aware Identification and Correction of Taxonomically Mislabeled Sequences.**
 >
@@ -137,7 +137,7 @@ If you use nf-core/sativa for your analysis, please cite the original article fo
 > Nucleic Acids Research 44, no. 11 (2016): 5022–33. https://doi.org/10.1093/nar/gkw396.
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use nf-core/sativa for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+<!-- If you use nf-core/taxmarker for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 

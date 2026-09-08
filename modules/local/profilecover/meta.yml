@@ -15,7 +15,7 @@ keywords:
   - alignment
   - filtering
   - hmmer
-  - sativa
+  - taxmarker
 tools:
   - "sativa":
       description: "Freely available tools for computational molecular biology."

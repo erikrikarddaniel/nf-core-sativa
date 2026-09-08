@@ -32,7 +32,7 @@ nextflow_pipeline {
                 // the taxonomy derived from headers rather than a separate file.
                 { assert mislabels.contains('DupHaloA') },
                 { assert mislabels.contains('DupSulfoA') },
-                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_sativa_software_mqc_versions.yml")).match("versions") },
+                { assert snapshot(removeNextflowVersion("$outputDir/pipeline_info/nf_core_taxmarker_software_mqc_versions.yml")).match("versions") },
             )
         }
 

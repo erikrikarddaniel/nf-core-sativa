@@ -36,7 +36,7 @@
                     "python": "3.11.10"
                 },
                 "Workflow": {
-                    "nf-core/sativa": "v1.0.0dev"
+                    "nf-core/taxmarker": "v1.0.0dev"
                 }
             }
         ],
@@ -92,7 +92,7 @@
                     "python": "3.11.10"
                 },
                 "Workflow": {
-                    "nf-core/sativa": "v1.0.0dev"
+                    "nf-core/taxmarker": "v1.0.0dev"
                 }
             }
         ],
@@ -132,7 +132,7 @@
                     "python": "3.12.12"
                 },
                 "Workflow": {
-                    "nf-core/sativa": "v1.0.0dev"
+                    "nf-core/taxmarker": "v1.0.0dev"
                 }
             }
         ],
@@ -188,7 +188,7 @@
                     "python": "3.11.10"
                 },
                 "Workflow": {
-                    "nf-core/sativa": "v1.0.0dev"
+                    "nf-core/taxmarker": "v1.0.0dev"
                 }
             }
         ],
