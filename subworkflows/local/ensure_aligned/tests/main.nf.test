@@ -14,7 +14,7 @@ nextflow_workflow {
         when {
             workflow {
                 """
-                input[0] = Channel.of(file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_loo_test.fasta', checkIfExists: true))
+                input[0] = Channel.of(file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_loo_test.fasta', checkIfExists: true))
                 input[1] = null
                 input[2] = null
                 """
@@ -42,8 +42,8 @@ nextflow_workflow {
         when {
             workflow {
                 """
-                input[0] = Channel.of(file(params.pipelines_testdata_base_path + '/sativa/testdata/checkaligned_test_unaligned.fasta', checkIfExists: true))
-                input[1] = params.pipelines_testdata_base_path + '/sativa/testdata/barrnap_arc.hmm'
+                input[0] = Channel.of(file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkaligned_test_unaligned.fasta', checkIfExists: true))
+                input[1] = params.pipelines_testdata_base_path + 'taxmarker/testdata/barrnap_arc.hmm'
                 input[2] = '16S_rRNA'
                 """
             }
@@ -86,7 +86,7 @@ nextflow_workflow {
         when {
             workflow {
                 """
-                input[0] = Channel.of(file(params.pipelines_testdata_base_path + '/sativa/testdata/checkaligned_test_unaligned.fasta', checkIfExists: true))
+                input[0] = Channel.of(file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkaligned_test_unaligned.fasta', checkIfExists: true))
                 input[1] = null
                 input[2] = null
                 """
