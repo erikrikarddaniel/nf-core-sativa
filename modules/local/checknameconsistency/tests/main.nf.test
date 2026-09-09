@@ -16,8 +16,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'checkname_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -62,8 +62,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'checkname_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test_missing.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test_missing.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -83,8 +83,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'checkname_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test_extra.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test_extra.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -104,8 +104,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'checkname_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test_collision.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test_collision.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test_collision.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test_collision.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -127,8 +127,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'checkname_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/checkname_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/checkname_test.fasta', checkIfExists: true),
                 ]
                 """
             }

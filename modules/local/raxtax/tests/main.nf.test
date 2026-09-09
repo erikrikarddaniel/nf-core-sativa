@@ -16,9 +16,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'raxtax_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtax_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtax_test.fasta', checkIfExists: true),
                 ]
-                input[1] = file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtax_test.fasta', checkIfExists: true)
+                input[1] = file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtax_test.fasta', checkIfExists: true)
                 """
             }
         }
@@ -52,9 +52,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'raxtax_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtax_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtax_test.fasta', checkIfExists: true),
                 ]
-                input[1] = file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtax_test.fasta', checkIfExists: true)
+                input[1] = file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtax_test.fasta', checkIfExists: true)
                 """
             }
         }

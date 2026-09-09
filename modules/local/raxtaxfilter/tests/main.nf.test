@@ -16,9 +16,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'raxtaxfilter_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.out', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.out', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -64,9 +64,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'raxtaxfilter_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.out', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.out', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -103,9 +103,9 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'raxtaxfilter_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.out', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/raxtaxfilter_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.out', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/raxtaxfilter_test.fasta', checkIfExists: true),
                 ]
                 """
             }

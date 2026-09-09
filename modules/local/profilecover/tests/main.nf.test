@@ -24,8 +24,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'profilecover_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/gapfilter_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/gapfilter_test.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -69,8 +69,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'profilecover_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/gapfilter_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/gapfilter_test.fasta', checkIfExists: true),
                 ]
                 """
             }
@@ -103,8 +103,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'profilecover_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.tax', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/gapfilter_test.fasta', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/gapfilter_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/gapfilter_test.fasta', checkIfExists: true),
                 ]
                 """
             }

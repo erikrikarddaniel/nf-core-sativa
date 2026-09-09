@@ -16,8 +16,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'sativa_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_test.alnfna', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_test.alnfna', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_test.tax', checkIfExists: true),
                 ]
                 """
             }
@@ -58,8 +58,8 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'sativa_test' ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_test.alnfna', checkIfExists: true),
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_test.alnfna', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_test.tax', checkIfExists: true),
                 ]
                 """
             }

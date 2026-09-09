@@ -17,13 +17,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'sativa_score_test' ],
                     [
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UnpCCeti.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UxjAloci.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UyvCanif.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq01.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq02.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_UnpCCeti.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_UxjAloci.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_UyvCanif.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_DupSeq01.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_DupSeq02.jplace.gz', checkIfExists: true),
                     ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test.tax', checkIfExists: true),
                 ]
                 """
             }
@@ -79,13 +79,13 @@ nextflow_process {
                 input[0] = [
                     [ id:'sativa_score_test' ],
                     [
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UnpCCeti.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UxjAloci.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_UyvCanif.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq01.jplace.gz', checkIfExists: true),
-                        file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test_DupSeq02.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_UnpCCeti.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_UxjAloci.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_UyvCanif.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_DupSeq01.jplace.gz', checkIfExists: true),
+                        file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test_DupSeq02.jplace.gz', checkIfExists: true),
                     ],
-                    file(params.pipelines_testdata_base_path + '/sativa/testdata/sativa_score_test.tax', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + 'taxmarker/testdata/sativa_score_test.tax', checkIfExists: true),
                 ]
                 """
             }
